@@ -1,20 +1,13 @@
 const mongoose = require('mongoose');
+const { optionSchema } = require('./Option');
 
-const productSchema = new mongoose.Schema({
+const foodSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: String, required: true },
-  category: { type: String, required: true },
-  options: [{
-    name: { type: String },
-    values: [{
-      value: { type: String },
-      priceAdjustment: { type: Number },
-    }],
-  }],
-  isAvailable: { type: Boolean, default: true },
-  order: { type: Number },
+  category: { type: String, required: true }, // alternativ: mongoose.Schema.Types.ObjectId
+  options: [optionSchema],
 });
 
-const Food = mongoose.model('Food', productSchema);
+const Food = mongoose.model('Food', foodSchema);
 module.exports = Food;
