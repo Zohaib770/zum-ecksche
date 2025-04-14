@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { optionSchema } = require('./Option');
+const { optionSchema } = require('./optionModel');
 
 const foodSchema = new mongoose.Schema({
   name: { type: String, required: true },

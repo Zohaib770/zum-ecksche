@@ -10,5 +10,5 @@ const optionSchema = new mongoose.Schema({
   values: [optionValueSchema],
 });
 
-const Options = mongoose.model('Option', optionsSchema);
-module.exports = { Options };
+const Options = mongoose.model('Option', optionSchema);
+module.exports = { optionSchema, Options };
