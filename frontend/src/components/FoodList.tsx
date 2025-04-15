@@ -1,19 +1,20 @@
-import React, { useEffect, useRef, useState, useCallback  } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Apis from '../api/Apis';
-import { Category, Food, Option } from '../types/index';
+import { Category, Food, Option } from '../types/Interfaces';
+import { useNavigate } from "react-router-dom";
 
 const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 const FoodList: React.FC = () => {
+  const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [foodsByCategory, setFoodsByCategory] = useState<Record<string, Food[]>>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [scrollPosition, setScrollPosition] = useState(0);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-  const [optionNames, setOptionNames] = useState<Option[]>([]);
   const categoriesRef = useRef<HTMLDivElement>(null);
-  const categoryElementsRef = useRef<{[key: string]: HTMLDivElement | null}>({});
+  const categoryElementsRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const setCategoryRef = useCallback((categoryId: string) => {
     return (el: HTMLDivElement | null) => {
       categoryElementsRef.current[categoryId] = el;
@@ -39,8 +40,6 @@ const FoodList: React.FC = () => {
           setSelectedCategoryId(String(fetchedCategories[0]._id));
         }
 
-        const fetchOptions = await Apis.fetchOption();
-        setOptionNames(fetchOptions);
       } catch (error) {
         console.error('Fehler beim Laden der Daten:', error);
       }
@@ -54,7 +53,7 @@ const FoodList: React.FC = () => {
     if (searchTerm.trim() === '') {
       // Reset to default when search is cleared
       setExpandedCategories(prev => {
-        const newState = {...prev};
+        const newState = { ...prev };
         Object.keys(newState).forEach(key => {
           newState[key] = false;
         });
@@ -63,18 +62,18 @@ const FoodList: React.FC = () => {
       return;
     }
 
-    const newExpandedState = {...expandedCategories};
+    const newExpandedState = { ...expandedCategories };
     let firstMatchCategoryId: string | null = null;
 
     categories.forEach(cat => {
       const catId = String(cat._id);
       const foods = foodsByCategory[catId] || [];
-      const hasMatch = foods.some(food => 
+      const hasMatch = foods.some(food =>
         food.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
 
       newExpandedState[catId] = hasMatch;
-      
+
       if (hasMatch && !firstMatchCategoryId) {
         firstMatchCategoryId = catId;
       }
@@ -109,13 +108,13 @@ const FoodList: React.FC = () => {
         const newCategoryId = String(categories[newIndex]._id);
         setSelectedCategoryId(newCategoryId);
         scrollToCategory(newCategoryId);
-        
+
         // Update scroll position
         const scrollAmount = categoriesRef.current.offsetWidth / 2;
-        const newScroll = direction === 'left' 
-          ? scrollPosition - scrollAmount 
+        const newScroll = direction === 'left'
+          ? scrollPosition - scrollAmount
           : scrollPosition + scrollAmount;
-        
+
         categoriesRef.current.scrollTo({ left: newScroll, behavior: 'smooth' });
         setScrollPosition(newScroll);
       }
@@ -136,6 +135,10 @@ const FoodList: React.FC = () => {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
+
+  const addFoodItem = (food: Food) => {
+    navigate("/fooditem", { state: { food } })
+  }
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
@@ -166,8 +169,8 @@ const FoodList: React.FC = () => {
 
       {/* Kategorie Scroll Navigation */}
       <div className="flex items-center justify-center mb-4">
-        <button 
-          onClick={() => handleScroll('left')} 
+        <button
+          onClick={() => handleScroll('left')}
           className="p-2 rounded-full bg-gray-200 mr-2 hover:bg-gray-300 transition"
         >
           {'<'}
@@ -176,19 +179,18 @@ const FoodList: React.FC = () => {
           {categories.map(cat => (
             <button
               key={String(cat._id)}
-              className={`px-4 py-2 rounded-full whitespace-nowrap transition ${
-                selectedCategoryId === String(cat._id)
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-black hover:bg-gray-300'
-              }`}
+              className={`px-4 py-2 rounded-full whitespace-nowrap transition ${selectedCategoryId === String(cat._id)
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 text-black hover:bg-gray-300'
+                }`}
               onClick={() => scrollToCategory(String(cat._id))}
             >
               {cat.name}
             </button>
           ))}
         </div>
-        <button 
-          onClick={() => handleScroll('right')} 
+        <button
+          onClick={() => handleScroll('right')}
           className="p-2 rounded-full bg-gray-200 ml-2 hover:bg-gray-300 transition"
         >
           {'>'}
@@ -200,22 +202,22 @@ const FoodList: React.FC = () => {
         {categories.map((cat) => {
           const catId = String(cat._id);
           const foods = foodsByCategory[catId] || [];
-          const filteredFoods = searchTerm 
-            ? foods.filter(food => 
-                food.name.toLowerCase().includes(searchTerm.toLowerCase())
-              )
+          const filteredFoods = searchTerm
+            ? foods.filter(food =>
+              food.name.toLowerCase().includes(searchTerm.toLowerCase())
+            )
             : foods;
 
           if (searchTerm && filteredFoods.length === 0) return null;
 
           return (
-            <div 
+            <div
               key={catId}
               id={`category-${catId}`}
               ref={setCategoryRef(catId)}
               className="border rounded-lg overflow-hidden"
             >
-              <div 
+              <div
                 className="flex justify-between items-center p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition"
                 onClick={() => toggleCategory(catId)}
               >
@@ -230,9 +232,8 @@ const FoodList: React.FC = () => {
                   <h3 className="font-medium">{cat.name}</h3>
                 </div>
                 <svg
-                  className={`w-5 h-5 text-gray-500 transform transition-transform ${
-                    expandedCategories[catId] ? 'rotate-180' : ''
-                  }`}
+                  className={`w-5 h-5 text-gray-500 transform transition-transform ${expandedCategories[catId] ? 'rotate-180' : ''
+                    }`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -248,19 +249,27 @@ const FoodList: React.FC = () => {
                       <div key={String(food._id)} className="pb-3 border-b last:border-0">
                         <div className="flex justify-between">
                           <div>
-                            <h4 className="font-medium">{food.name}</h4>
+                            <h4 className="font-medium">
+                              {food.name} <span className="font-medium">{food.price}</span>
+                            </h4>
                             {food.description && (
                               <p className="text-sm text-gray-600">{food.description}</p>
                             )}
                           </div>
-                          <span className="font-medium">{food.price}€</span>
+                          <button
+                            type="button"
+                            onClick={() => addFoodItem(food)}
+                            className="w-7 h-7 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                          >
+                            +
+                          </button>
                         </div>
-                        {food.options?.map((option, i) => (
+                        {food.options?.map((option: Option, i) => (
                           <div key={i} className="mt-1 text-sm">
                             <span className="text-gray-600">{option.name}: </span>
-                            {option.values.map((val, j) => (
+                            {option.values?.map((val, j) => (
                               <span key={j} className="mr-2">
-                                {val.value} {val.priceAdjustment !== 0 && `(${val.priceAdjustment}€)`}
+                                {val.value} {val.price !== '' && `(${val.price})`}
                               </span>
                             ))}
                           </div>
