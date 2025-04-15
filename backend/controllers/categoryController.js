@@ -27,10 +27,13 @@ const createCategory = async (req, res) => {
     }
 
     try {
+      const parsedOptions = req.body.options ? JSON.parse(req.body.options) : [];
+
       const category = new Category({
         name: req.body.name,
         description: req.body.description,
         imageUrl: req.file ? req.file.path : undefined,
+        options: parsedOptions,
       });
 
       await category.save();
