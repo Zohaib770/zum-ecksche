@@ -1,115 +1,169 @@
-import React, { useState } from 'react';
-import { Food, Category, Option } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Category, Food, Option } from '../types/Interfaces';
+import Apis from '../api/Apis';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 
-interface FoodFormProps {
-  categories: Category[];
-  optionnames: Option[];
-  onAdd: (foodData: Omit<Food, '_id'>) => void;
-}
-
-const FoodForm: React.FC<FoodFormProps> = ({ categories, optionnames, onAdd }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    category: '',
-  });
-  const [options, setOptions] = useState<{ name: string; values: { value: string; priceAdjustment: number }[] }[]>([]);
-  const [newOption, setNewOption] = useState({
-    name: '',
-    value: '',
-    priceAdjustment: 0,
+const FoodForm: React.FC = () => {
+  const navigate = useNavigate();
+  const [availableOptionsNames, setAvailableOptionsNames] = useState<Option[]>([]);
+  const [availableCategoryNames, setAvailableCategoryNames] = useState<Category[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [food, setFood] = useState<Food>({
+    name: "",
+    description: "",
+    price: "",
+    category: "",
+    options: []
   });
 
-  const handleAddOption = () => {
-    if (!newOption.name || !newOption.value) return;
+  const [currentOption, setCurrentOption] = useState({
+    name: "",
+    value: "",
+    price: ""
+  });
 
-    setOptions(prev => {
-      const existing = prev.find(opt => opt.name === newOption.name);
-      if (existing) {
-        return prev.map(opt =>
-          opt.name === newOption.name
-            ? {
-              ...opt, values: [...opt.values, {
-                value: newOption.value,
-                priceAdjustment: newOption.priceAdjustment
-              }]
-            }
-            : opt
-        );
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [options, categories] = await Promise.all([
+          Apis.fetchOption(),
+          Apis.fetchCategories()
+        ]);
+        setAvailableOptionsNames(options);
+        setAvailableCategoryNames(categories);
+      } catch (error) {
+        toast.error('Fehler beim Laden der Daten');
+        console.error("Error loading data:", error);
       }
-      return [...prev, {
-        name: newOption.name,
-        values: [{
-          value: newOption.value,
-          priceAdjustment: newOption.priceAdjustment
-        }]
-      }];
-    });
+    };
 
-    setNewOption({ name: '', value: '', priceAdjustment: 0 });
-  };
+    loadData();
+  }, []);
 
-  const handleRemoveOption = (optionName: string, valueIndex: number) => {
-    setOptions(prev =>
-      prev.map(opt =>
-        opt.name === optionName
-          ? {
-            ...opt,
-            values: opt.values.filter((_, i) => i !== valueIndex)
+  // Option handlers
+  const addOption = () => {
+    if (!currentOption.name || !currentOption.value) {
+      toast.warn('Bitte Optionenname und Wert ausfüllen');
+      return;
+    }
+
+    setFood(prev => {
+      const existingOptionIndex = prev.options?.findIndex(opt => opt.name === currentOption.name) ?? -1;
+
+      if (existingOptionIndex >= 0) {
+        // Update existing option
+        const updatedOptions = [...(prev.options || [])];
+        updatedOptions[existingOptionIndex] = {
+          ...updatedOptions[existingOptionIndex],
+          values: [
+            ...(updatedOptions[existingOptionIndex].values || []),
+            { value: currentOption.value, price: currentOption.price || undefined }
+          ]
+        };
+        return { ...prev, options: updatedOptions };
+      }
+
+      // Add new option
+      return {
+        ...prev,
+        options: [
+          ...(prev.options || []),
+          {
+            name: currentOption.name,
+            values: [{ value: currentOption.value, price: currentOption.price || undefined }]
           }
-          : opt
-      ).filter(opt => opt.values.length > 0)
-    );
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.category || !formData.name || !formData.price) return;
-
-    onAdd({
-      ...formData,
-      price: formData.price,
-      options
+        ]
+      };
     });
 
-    setFormData({ name: '', description: '', price: '', category: '' });
-    setOptions([]);
+    setCurrentOption({ name: '', value: '', price: '' });
+    toast.success('Option hinzugefügt');
+  };
+
+  const removeOption = (optionName: string, valueIndex: number) => {
+    setFood(prev => {
+      const updatedOptions = prev.options
+        ?.map(option => {
+          if (option.name === optionName) {
+            const updatedValues = option.values?.filter((_, i) => i !== valueIndex);
+            return { ...option, values: updatedValues?.length ? updatedValues : undefined };
+          }
+          return option;
+        })
+        .filter(option => option.values?.length) || [];
+
+      return { ...prev, options: updatedOptions.length ? updatedOptions : undefined };
+    });
+  };
+
+  // Form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!food.category || !food.name || !food.price) {
+      toast.error('Bitte alle Pflichtfelder ausfüllen');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      await Apis.addFood(food);
+      toast.success('Speise erfolgreich hinzugefügt');
+      setFood({
+        name: "",
+        description: "",
+        price: "",
+        category: "",
+        options: []
+      });
+      navigate("/admin/menu-preview");
+    } catch (error) {
+      toast.error('Fehler beim Hinzufügen der Speise');
+      console.error("Error adding food:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-xl font-semibold text-gray-800 mb-4">Neue Speise</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Name Field */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Name*</label>
           <input
             type="text"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            value={food.name}
+            onChange={(e) => setFood({ ...food, name: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
             required
           />
         </div>
 
+        {/* Description Field */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
           <textarea
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            value={food.description}
+            onChange={(e) => setFood({ ...food, description: e.target.value })}
             rows={2}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
           />
         </div>
 
+        {/* Price and Category */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Preis*</label>
             <input
               type="text"
-              min="1"
-              value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              value={food.price}
+              onChange={(e) => setFood({ ...food, price: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
               required
             />
@@ -118,13 +172,13 @@ const FoodForm: React.FC<FoodFormProps> = ({ categories, optionnames, onAdd }) =
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Kategorie*</label>
             <select
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              value={food.category}
+              onChange={(e) => setFood({ ...food, category: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
               required
             >
               <option value="">Auswählen...</option>
-              {categories.map((cat) => (
+              {availableCategoryNames.map((cat) => (
                 <option key={String(cat._id)} value={cat.name}>
                   {cat.name}
                 </option>
@@ -133,25 +187,27 @@ const FoodForm: React.FC<FoodFormProps> = ({ categories, optionnames, onAdd }) =
           </div>
         </div>
 
+        {/* Options Section */}
         <div className="border-t pt-4">
           <h3 className="text-md font-medium text-gray-800 mb-3">Optionen</h3>
 
-          {options.length > 0 && (
+          {/* Existing Options */}
+          {food.options?.length ? (
             <div className="mb-4 space-y-3">
-              {options.map((option, i) => (
+              {food.options.map((option, i) => (
                 <div key={i} className="border rounded-md p-3">
                   <div className="font-medium text-gray-700 mb-2">{option.name}</div>
                   <ul className="space-y-1">
-                    {option.values.map((val, j) => (
+                    {option.values?.map((val, j) => (
                       <li key={j} className="flex justify-between items-center">
                         <span>{val.value}</span>
                         <div className="flex items-center">
                           <span className="text-sm text-gray-600 mr-3">
-                            {val.priceAdjustment}€
+                            {val.price}€
                           </span>
                           <button
                             type="button"
-                            onClick={() => handleRemoveOption(option.name, j)}
+                            onClick={() => removeOption(option.name, j)}
                             className="text-red-500 hover:text-red-700"
                           >
                             ×
@@ -163,17 +219,18 @@ const FoodForm: React.FC<FoodFormProps> = ({ categories, optionnames, onAdd }) =
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
 
-          <div className="space-y-2 border border-red-500">
+          {/* Add New Option */}
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
               <select
-                value={newOption.name}
-                onChange={(e) => setNewOption({ ...newOption, name: e.target.value })}
+                value={currentOption.name}
+                onChange={(e) => setCurrentOption({ ...currentOption, name: e.target.value })}
                 className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
               >
                 <option value="">Option</option>
-                {optionnames.map((op) => (
+                {availableOptionsNames.map((op) => (
                   <option key={String(op._id)} value={op.name}>
                     {op.name}
                   </option>
@@ -183,8 +240,8 @@ const FoodForm: React.FC<FoodFormProps> = ({ categories, optionnames, onAdd }) =
               <input
                 type="text"
                 placeholder="Wert"
-                value={newOption.value}
-                onChange={(e) => setNewOption({ ...newOption, value: e.target.value })}
+                value={currentOption.value}
+                onChange={(e) => setCurrentOption({ ...currentOption, value: e.target.value })}
                 className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
               />
 
@@ -192,28 +249,29 @@ const FoodForm: React.FC<FoodFormProps> = ({ categories, optionnames, onAdd }) =
                 type="number"
                 placeholder="0"
                 step="0.5"
-                value={newOption.priceAdjustment}
-                onChange={(e) => setNewOption({ ...newOption, priceAdjustment: Number(e.target.value) })}
+                value={currentOption.price}
+                onChange={(e) => setCurrentOption({ ...currentOption, price: e.target.value })}
                 className="w-20 px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
               />
 
               <button
                 type="button"
-                onClick={handleAddOption}
+                onClick={addOption}
                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
               >
                 +
               </button>
             </div>
           </div>
-
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
-          className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded-md transition-colors mt-4"
+          disabled={isSubmitting}
+          className={`w-full bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded-md transition-colors mt-4 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          Speise hinzufügen
+          {isSubmitting ? 'Wird hinzugefügt...' : 'Speise hinzufügen'}
         </button>
       </form>
     </div>

@@ -1,5 +1,5 @@
 import axiosInstance from './AxiosInstance.tsx';
-import { Category, Food, Option } from '../types';
+import { Category, Food, Option } from '../types/Interfaces.tsx';
 
 const Apis = {
 
