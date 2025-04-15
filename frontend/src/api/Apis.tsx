@@ -1,5 +1,5 @@
 import axiosInstance from './AxiosInstance.tsx';
-import { Category, Food, Option } from '../types/Interfaces.tsx';
+import { Category, Food, Option, Order } from '../types/Interfaces.tsx';
 
 const Apis = {
 
@@ -42,7 +42,7 @@ const Apis = {
 
   addFood: async (foodData: Omit<Food, '_id'>) => {
     try {
-      await axiosInstance.post('/api/create-food', foodData); // Verwende axiosInstance
+      await axiosInstance.post('/api/create-food', foodData);
     } catch (error) {
       console.error('Fehler beim Hinzufügen der Speise:', error);
       throw error;
@@ -54,6 +54,17 @@ const Apis = {
     try {
       const response = await axiosInstance.get('/api/fetch-option');
       return response.data as Option[];
+    } catch (error) {
+      console.error('Fehler beim Abrufen der Option:', error);
+      throw error;
+    }
+  },
+
+  //order
+  addOrder: async (order: Order) => {
+    try {
+      await axiosInstance.post('/api/create-order', order);
+      console.error('Order erfolgreich');
     } catch (error) {
       console.error('Fehler beim Abrufen der Option:', error);
       throw error;
