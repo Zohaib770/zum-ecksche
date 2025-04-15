@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axiosInstance from '../api//axiosInstance';
+import axiosInstance from '../api/AxiosInstance';
 import texts from "../lang/de.json";
 import { useNavigate } from 'react-router-dom';
 
@@ -15,7 +15,7 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       await axiosInstance.post('/api/login', { email, password });
-      navigate('/admin');
+      navigate('/admin/');
     } catch (err) {
       setError(texts.error);
     } 
@@ -55,7 +55,7 @@ export default function LoginPage() {
           <div>
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+              className="w-full text-white py-2 rounded-md bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
             >
               {texts.login_button}
             </button>
@@ -63,7 +63,7 @@ export default function LoginPage() {
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         </form>
         <p className="mt-4 text-center text-sm">
-          {texts.no_account} <a href="/register" className="text-blue-600 hover:underline">{texts.register_link}</a>
+          {texts.no_account} <a href="/register" className="text-yellow-600 hover:underline">{texts.register_link}</a>
         </p>
       </div>
     </div>
