@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Category, Option } from '../types/Interfaces';
-import Apis from '../api/Apis';
+import { Category, Option } from '../../types/Interfaces';
+import Apis from '../../api/Apis';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
