@@ -3,7 +3,7 @@ const { loginUser } = require('../controllers/authController');
 const categoryController = require('../controllers/categoryController');
 const foodController = require('../controllers/foodController');
 const optionController = require('../controllers/optionController')
-const createOrder = require('../controllers/orderController')
+const orderController = require('../controllers/orderController')
 
 const router = express.Router();
 
@@ -22,6 +22,8 @@ router.get('/fetch-foods-by-category/:categoryId', foodController.getFoodByCateg
 router.get('/fetch-option', optionController.getOption);
 
 //order
-router.post('/create-order', createOrder);
+router.post('/create-order', orderController.createOrder);
+router.get('/fetch-all-order', orderController.getOrders);
+router.post('/update-order-status', orderController.updateOrderStatus)
 
 module.exports = router;

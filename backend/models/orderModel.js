@@ -1,5 +1,5 @@
-// models/Order.ts
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
+const { optionSchema } = require('./optionModel');
 
 const DeliveryAddressSchema = new mongoose.Schema({
   street: String,
@@ -23,14 +23,14 @@ const cartItemSchema = new mongoose.Schema({
   });
 
 const OrderSchema = new mongoose.Schema({
-  cartItem: [CartItemSchema],
+  cartItem: [cartItemSchema],
   personalDetail: PersonalDetailSchema,
   orderType: { type: String, enum: ['delivery', 'pickup'], required: true },
   paymentMethod: { type: String, enum: ['cash', 'online'], required: true },
   deliveryAddress: { type: DeliveryAddressSchema, required: function () {
     return this.orderType === 'delivery';
   }},
-  status: { type: String, default: 'pending' },
+  status: { type: String, default: 'new' },
   createdAt: { type: String, default: () => new Date().toISOString() }
 });
 
