@@ -10,7 +10,6 @@ const Cart: React.FC = () => {
   const calculateTotal = (): number => {
     const total = items.reduce((sum, item) => {
       const basePrice = parseFloat(item.price);
-      console.log("base price = ", basePrice);
       return sum + basePrice;
     }, 0);
 

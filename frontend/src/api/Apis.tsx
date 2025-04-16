@@ -64,13 +64,34 @@ const Apis = {
   addOrder: async (order: Order) => {
     try {
       await axiosInstance.post('/api/create-order', order);
-      console.error('Order erfolgreich');
     } catch (error) {
       console.error('Fehler beim Abrufen der Option:', error);
       throw error;
     }
   },
 
+  fetchOrder: async () => {
+    try {
+      const response = await axiosInstance.get('/api/fetch-all-order');
+      return response.data as Order[];
+    } catch (error) {
+      console.error('Fehler beim Abrufen der fetch all order:', error);
+      throw error;
+    }
+  },
+
+  updateOrderStatus: async (orderId: number, newStatus: string) =>{
+    try {
+      const response = await axiosInstance.post('/api/update-order-status', {
+        orderId,
+        newStatus,
+      });
+      return response.data as Order;
+    } catch (error) {
+      console.error('Fehler beim Abrufen der update order:', error);
+      throw error;
+    }
+  },
 };
 
 export default Apis;
