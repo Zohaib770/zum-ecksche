@@ -24,7 +24,6 @@ export default function FoodItem() {
     for (const option of options) {
       const selectedValue = option.values?.[0];
       if (selectedValue?.price) {
-        console.log("optionprice", parseFloat(selectedValue.price).toFixed(2));
         return parseFloat(selectedValue.price).toFixed(2);
       }
     }
@@ -70,9 +69,7 @@ export default function FoodItem() {
   const handleAddToCart = () => {
     const completeCartItem: CartItem = {
       ...cartItem,
-      _id: Date.now(), // Generiere eine temporäre ID
       name: food.name,
-      // price wird bereits korrekt berechnet in cartItem
     };
 
     addToCart(completeCartItem);
