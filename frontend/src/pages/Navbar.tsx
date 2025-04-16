@@ -10,7 +10,7 @@ const Navbar: React.FC = () => {
     const { items } = useCart();
 
     return (
-        <nav className="bg-yellow-600 px-6 py-3 shadow-md">
+        <nav className="bg-yellow-600 px-6 py-3 shadow-md sticky top-0 z-50">
             <div className="container mx-auto flex justify-between items-center">
                 <Link to="/" className="text-white font-bold text-xl">
                     {texts.zum_ecksche}
