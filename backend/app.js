@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // constant
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 const MONGODB_URI = process.env.MONGODB_URI;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 

@@ -4,6 +4,7 @@ const categoryController = require('../controllers/categoryController');
 const foodController = require('../controllers/foodController');
 const optionController = require('../controllers/optionController')
 const orderController = require('../controllers/orderController')
+const { verifyToken } = require('../config/jwtVerify')
 
 const router = express.Router();
 
@@ -11,11 +12,11 @@ const router = express.Router();
 router.post('/login', loginUser);
 
 //category
-router.post('/create-category', categoryController.createCategory);
+router.post('/create-category', verifyToken, categoryController.createCategory);
 router.get('/fetch-all-category', categoryController.getCategories);
 
 //food
-router.post('/create-food', foodController.createFood);
+router.post('/create-food', verifyToken, foodController.createFood);
 router.get('/fetch-foods-by-category/:categoryId', foodController.getFoodByCategory);
 
 //option
@@ -23,7 +24,7 @@ router.get('/fetch-option', optionController.getOption);
 
 //order
 router.post('/create-order', orderController.createOrder);
-router.get('/fetch-all-order', orderController.getOrders);
-router.post('/update-order-status', orderController.updateOrderStatus)
+router.get('/fetch-all-order', verifyToken, orderController.getOrders);
+router.post('/update-order-status', verifyToken, orderController.updateOrderStatus)
 
 module.exports = router;
