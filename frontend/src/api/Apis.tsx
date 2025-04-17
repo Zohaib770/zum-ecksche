@@ -13,12 +13,11 @@ const Apis = {
       throw error;
     }
   },
-  
+
   // categorie
   fetchCategories: async () => {
     try {
       const response = await axiosPublic.get('/api/fetch-all-category');
-      console.log("data= ", response.data);
       return response.data as Category[];
     } catch (error) {
       console.error('Fehler beim Abrufen der Kategorien:', error);
@@ -27,7 +26,6 @@ const Apis = {
   },
 
   addCategory: async (formData: FormData) => {
-    console.log("===== addCategory ENTER client");
     try {
       await axiosPrivate.post('/api/create-category', formData, {
         headers: {
@@ -36,6 +34,15 @@ const Apis = {
       });
     } catch (error) {
       console.error('Fehler beim Hinzufügen der Kategorie:', error);
+      throw error;
+    }
+  },
+
+  deleteCategory: async (id: number) => {
+    try {
+      await axiosPrivate.post('/api/delete-category', { categoryId: id });
+    } catch (error) {
+      console.error('Fehler beim delete der Kategorie:', error);
       throw error;
     }
   },
@@ -51,12 +58,30 @@ const Apis = {
     }
   },
 
+  fetchFood: async () => {
+    try {
+      const response = await axiosPublic.get(`/api/fetch-all-foods`);
+      return response.data as Food[];
+    } catch (error) {
+      console.error('Fehler beim Abrufen Foods', error);
+      throw error;
+    }
+  },
 
   addFood: async (foodData: Omit<Food, '_id'>) => {
     try {
       await axiosPrivate.post('/api/create-food', foodData);
     } catch (error) {
       console.error('Fehler beim Hinzufügen der Speise:', error);
+      throw error;
+    }
+  },
+
+  deleteFood: async (id: number) => {
+    try {
+      await axiosPrivate.post('/api/delete-food', { foodId: id });
+    } catch (error) {
+      console.error('Fehler beim delete der Food:', error);
       throw error;
     }
   },
@@ -92,7 +117,7 @@ const Apis = {
     }
   },
 
-  updateOrderStatus: async (orderId: number, newStatus: string) =>{
+  updateOrderStatus: async (orderId: number, newStatus: string) => {
     try {
       const response = await axiosPrivate.post('/api/update-order-status', {
         orderId,
