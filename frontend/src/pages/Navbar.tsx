@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import texts from '../lang/de.json';
-import InfoIcon from '../assets/info-icon.jpeg';
-import ProfileIcon from '../assets/profile-icon.jpeg';
-import WarenkorbIcon from '../assets/warenkorb-icon.jpeg';
+import InfoIcon from '../assets/icons/info.jpeg';
+import ProfileIcon from '../assets/icons/profile.jpeg';
+import WarenkorbIcon from '../assets/icons/cart.jpeg';
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 
