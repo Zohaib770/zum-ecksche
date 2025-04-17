@@ -1,7 +1,20 @@
+// AxiosInstances.ts
 import axios from 'axios';
 
-const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
+export const axiosPublic = axios.create({
+  baseURL: BASE_URL,
 });
 
-export default axiosInstance;
+export const axiosPrivate = axios.create({
+  baseURL: BASE_URL,
+});
+
+axiosPrivate.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});

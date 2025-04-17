@@ -3,7 +3,7 @@ import Apis from '../api/Apis';
 import { Category, Food, Option } from '../types/Interfaces';
 import { useNavigate } from "react-router-dom";
 
-const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 const FoodList: React.FC = () => {
   const navigate = useNavigate();

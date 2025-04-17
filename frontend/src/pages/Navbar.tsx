@@ -1,22 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import texts from '../lang/de.json';
 import InfoIcon from '../assets/info-icon.jpeg';
 import ProfileIcon from '../assets/profile-icon.jpeg';
 import WarenkorbIcon from '../assets/warenkorb-icon.jpeg';
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar: React.FC = () => {
     const { items } = useCart();
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            // Optional: Du kannst hier auch ein Token-Validation-Call einbauen
-            setIsLoggedIn(true);
-        }
-    }, []);
+    const { isLoggedIn, logout } = useAuth();
 
     return (
         <nav className="bg-yellow-600 px-6 py-3 shadow-md sticky top-0 z-50">
@@ -37,6 +30,11 @@ const Navbar: React.FC = () => {
                     >
                         <img src={ProfileIcon} alt="Profil" className="w-6 h-6 rounded-full object-cover" />
                     </Link>
+                    {isLoggedIn && (
+                        <button onClick={logout} className="text-white bg-yellow-600 px-3 py-1 rounded hover:bg-red-700">
+                            Abmelden
+                        </button>
+                    )}
                     <Link to="/cart" className="relative p-2 rounded hover:bg-red-700 transition flex items-center justify-center">
                         <img src={WarenkorbIcon} alt="Warenkorb" className="w-6 h-6 object-contain" />
                         {items.length > 0 && (

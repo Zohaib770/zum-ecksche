@@ -1,12 +1,15 @@
 import { useState } from "react";
-import axiosInstance from '../api/AxiosInstance';
+import Apis from '../api/Apis';
 import texts from "../lang/de.json";
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const { login } = useAuth();
 
   const navigate = useNavigate();
 
@@ -14,11 +17,17 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axiosInstance.post('/api/login', { email, password });
-      navigate('/admin/');
+      const response = await Apis.userLogin(email, password);
+      if (response) {
+        localStorage.setItem('token', response.data.token);
+        login();
+        navigate('/admin/');
+      } else {
+        setError(texts.error);
+      }
     } catch (err) {
       setError(texts.error);
-    } 
+    }
   };
 
   return (

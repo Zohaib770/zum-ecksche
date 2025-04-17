@@ -64,7 +64,7 @@ const MenuPreview: React.FC = () => {
                 <div className="flex items-center">
                   {cat.imageUrl && (
                     <img
-                      src={`${import.meta.env.VITE_API_BASE_URL}/${cat.imageUrl}`}
+                      src={`${import.meta.env.VITE_BACKEND_URL}/${cat.imageUrl}`}
                       alt={cat.name}
                       className="w-10 h-10 object-cover rounded mr-3"
                     />

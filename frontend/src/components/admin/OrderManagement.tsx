@@ -54,7 +54,7 @@ const OrderManagement = () => {
       await fetchOrders();
     })();
 
-    const socket = socketIOClient(import.meta.env.VITE_API_BASE_URL);
+    const socket = socketIOClient(import.meta.env.VITE_BACKEND_URL);
     socket.on('newOrder', handleNewOrder);
     allowAudioPlayback(audioRef as React.RefObject<HTMLAudioElement>);
 
