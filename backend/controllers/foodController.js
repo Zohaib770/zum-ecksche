@@ -24,3 +24,24 @@ exports.getFoodByCategory = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getFoods = async (req, res) => {
+  try {
+    const foods = await Food.find().sort({ category: 1 });;
+    res.json(foods);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.deleteFood = async (req, res) => {
+  try {
+    console.log("delete Food ENTER");
+    const { foodId } = req.body;
+    await Food.findByIdAndDelete(foodId);
+    console.log("Food aus der Datenbank gelöscht");
+    res.status(200).json({ message: 'Kategorie und Bild erfolgreich gelöscht.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Fehler beim Löschen der Kategorie.', error: error.message });
+  }
+};

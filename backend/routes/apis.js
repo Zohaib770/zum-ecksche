@@ -14,10 +14,13 @@ router.post('/login', loginUser);
 //category
 router.post('/create-category', verifyToken, categoryController.createCategory);
 router.get('/fetch-all-category', categoryController.getCategories);
+router.post('/delete-category',  verifyToken, categoryController.deleteCategory);
 
 //food
 router.post('/create-food', verifyToken, foodController.createFood);
 router.get('/fetch-foods-by-category/:categoryId', foodController.getFoodByCategory);
+router.get('/fetch-all-foods', foodController.getFoods);
+router.post('/delete-food', foodController.deleteFood);
 
 //option
 router.get('/fetch-option', optionController.getOption);
