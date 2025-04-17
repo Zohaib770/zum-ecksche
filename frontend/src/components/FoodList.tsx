@@ -146,7 +146,7 @@ const FoodList: React.FC = () => {
       <div className="relative mb-4">
         <input
           type="text"
-          placeholder="Suche Speise..."
+          placeholder="Speise suchen..."
           value={searchTerm}
           onChange={handleSearchChange}
           className="w-full p-2 border rounded-md pl-10"
@@ -180,7 +180,7 @@ const FoodList: React.FC = () => {
             <button
               key={String(cat._id)}
               className={`px-4 py-2 rounded-full whitespace-nowrap transition ${selectedCategoryId === String(cat._id)
-                ? 'bg-blue-500 text-white'
+                ? 'bg-yellow-500 text-white'
                 : 'bg-gray-200 text-black hover:bg-gray-300'
                 }`}
               onClick={() => scrollToCategory(String(cat._id))}

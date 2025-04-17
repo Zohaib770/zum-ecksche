@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 
 
 export default function LoginPage() {
+  const t = texts.LoginPage;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,21 +24,21 @@ export default function LoginPage() {
         login();
         navigate('/admin/');
       } else {
-        setError(texts.error);
+        setError(t.error);
       }
     } catch (err) {
-      setError(texts.error);
+      setError(t.error);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">{texts.login_title}</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">{t.title}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              {texts.email_label}
+              {t.email_label}
             </label>
             <input
               type="email"
@@ -50,7 +51,7 @@ export default function LoginPage() {
           </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              {texts.password_label}
+              {t.password_label}
             </label>
             <input
               type="password"
@@ -66,13 +67,13 @@ export default function LoginPage() {
               type="submit"
               className="w-full text-white py-2 rounded-md bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
             >
-              {texts.login_button}
+              {t.login_button}
             </button>
           </div>
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         </form>
         <p className="mt-4 text-center text-sm">
-          {texts.no_account} <a href="/register" className="text-yellow-600 hover:underline">{texts.register_link}</a>
+          {t.no_account} <a href="/register" className="text-yellow-600 hover:underline">{t.register_link}</a>
         </p>
       </div>
     </div>

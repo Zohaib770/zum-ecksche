@@ -1,13 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import texts from '../lang/de.json';
+
 import InfoIcon from '../assets/icons/info.jpeg';
 import ProfileIcon from '../assets/icons/profile.jpeg';
 import WarenkorbIcon from '../assets/icons/cart.jpeg';
+
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 
 const Navbar: React.FC = () => {
+    const t = texts.Navbar;
     const { items } = useCart();
     const { isLoggedIn, logout } = useAuth();
 
@@ -15,7 +18,7 @@ const Navbar: React.FC = () => {
         <nav className="bg-yellow-600 px-6 py-3 shadow-md sticky top-0 z-50">
             <div className="container mx-auto flex justify-between items-center">
                 <Link to="/" className="text-white font-bold text-xl">
-                    {texts.zum_ecksche}
+                    {t.zum_ecksche}
                 </Link>
                 <div className="flex items-center space-x-4">
                     <Link

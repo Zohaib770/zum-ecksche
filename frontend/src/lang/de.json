@@ -1,8 +1,17 @@
 {
-    "warenkorb": "Warenkorb",
-    "zum_ecksche": "Zum Ecksche",
-
-    "login_title": "Anmeldung",
+  "Navbar": {
+    "zum_ecksche": "Zum Ecksche"
+  },
+  "HeroSection": {
+    "title": "Entdecke den Geschmack der Stadt",
+    "subtitle": "Direkt zu Ihnen nach Hause",
+    "description": "Frische Zutaten, ehrliche Rezepte – dein neues Lieblingsgericht ist nur einen Klick entfernt.",
+    "delivery_time": "Lieferzeit: 30–60 Min",
+    "min_order": "Mindestbestellwert: 12€",
+    "menu_button": "Menü entdecken"
+  },
+  "LoginPage": {
+    "title": "Anmeldung",
     "email_label": "E-Mail-Adresse",
     "password_label": "Passwort",
     "login_button": "Anmelden",
@@ -10,5 +19,25 @@
     "register_link": "Registrieren",
     "error": "Ungültige Anmeldedaten",
     "success": "Erfolgreich angemeldet!"
+  },
+  "Footer": {
+    "kontakt": "Kontakt",
+    "address": "Zum Eck'sche Kaiserslautern\nMedicusstraße 26\n67655 Kaiserslautern",
+    "tel": "Tel.: 0631-41488411",
+    "whatsapp": "Whatsapp: 0152-38831149",
+    "opening_hours_title": "Öffnungszeiten",
+    "opening_hours": "Dienstag: Ruhetag\nMo, Mi, Do: 17:00 - 23:00 Uhr\nFr, Sa: 16:30 - 23:00 Uhr\nSo & Feiertage: 16:30 - 23:00 Uhr",
+    "delivery_title": "Liefergebiete",
+    "delivery_areas": "Kl-Zentrum, Kl-Ost, Kl-Hohenecken, Kl-Einsiedlerhof,\nKl-Morlautern, Kl-Erlenbach, Kl-Erzhütten, Kl-Bännjerrück,\nweitere Orte gerne auf Anfrage.",
+    "title": "Warum bei uns bestellen?",
+    "fastDeliveryTitle": "Schnelle Lieferung",
+    "fastDeliveryText": "Wir liefern Ihre Bestellung innerhalb von 30-60 Minuten direkt zu Ihnen nach Hause.",
+    "onlinePaymentTitle": "Online-Bezahlung",
+    "onlinePaymentText": "Bezahlen Sie bequem und sicher online mit verschiedenen Zahlungsmethoden.",
+    "freshIngredientsTitle": "Frische Zutaten",
+    "freshIngredientsText": "Wir verwenden hochwertige und frische Zutaten für unsere Speisen.",
+    "contactlessDeliveryTitle": "Kontaktlose Lieferung",
+    "contactlessDeliveryText": "Auf Wunsch stellen wir Ihre Bestellung kontaktlos vor Ihrer Tür ab.",
+    "rechte_vorbehalten": "© 2025 Zum Eck’sche – Alle Rechte vorbehalten."
   }
-  
+}
