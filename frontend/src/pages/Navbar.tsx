@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import texts from '../lang/de.json';
 import InfoIcon from '../assets/info-icon.jpeg';
@@ -8,6 +8,15 @@ import { useCart } from "../context/CartContext";
 
 const Navbar: React.FC = () => {
     const { items } = useCart();
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            // Optional: Du kannst hier auch ein Token-Validation-Call einbauen
+            setIsLoggedIn(true);
+        }
+    }, []);
 
     return (
         <nav className="bg-yellow-600 px-6 py-3 shadow-md sticky top-0 z-50">
@@ -23,7 +32,7 @@ const Navbar: React.FC = () => {
                         <img src={InfoIcon} alt="Info" className="w-6 h-6 object-contain" />
                     </Link>
                     <Link
-                        to="/login"
+                        to={isLoggedIn ? "/admin" : "/login"}
                         className="p-2 rounded hover:bg-red-700 transition flex items-center justify-center"
                     >
                         <img src={ProfileIcon} alt="Profil" className="w-6 h-6 rounded-full object-cover" />
