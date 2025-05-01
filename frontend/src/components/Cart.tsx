@@ -2,21 +2,28 @@ import React from 'react';
 import { useCart } from '../context/CartContext';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+import { convertPriceFromCommaToDot } from '../utils/helpFunctions';
+import { toast } from 'react-toastify';
 
 const Cart: React.FC = () => {
   const navigate = useNavigate();
   const { items, removeFromCart } = useCart();
 
-  const calculateTotal = (): number => {
+  const calculateTotal = (): string => {
     const total = items.reduce((sum, item) => {
-      const basePrice = parseFloat(item.price);
+      const basePrice = parseFloat(convertPriceFromCommaToDot(item.price));
       return sum + basePrice;
     }, 0);
 
-    return parseFloat(total.toFixed(2));
+    return total.toFixed(2).replace('.', ',');
   };
 
   const handleGoToCheckout = () => {
+    const total = parseFloat(convertPriceFromCommaToDot(calculateTotal()));
+    if (total < 12) {
+      toast.error('Mindestbestellwert ist 12 €');
+      return;
+    }
     navigate('/checkout');
   };
 
@@ -36,7 +43,7 @@ const Cart: React.FC = () => {
             <div key={index} className="border-b pb-4">
               <div className="flex justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold">{item.name}</h2>
+                  <h2 className="text-xl font-semibold">{item.quantity} x {item.name}</h2>
                 </div>
                 <button
                   onClick={() => removeFromCart(index)}
@@ -50,7 +57,12 @@ const Cart: React.FC = () => {
                 <ul className="mt-2 text-sm text-gray-700">
                   {item.options.map((option, idx) => (
                     <li key={idx}>
-                      {option.name}: <strong>{option.values?.[0]?.value}</strong>
+                      {/* {option.name}: <strong>{option.values?.[0]?.value}</strong> */}
+                     
+                      {option.name}: {option.values?.map((val, index) => (
+                        <strong key={index}> {val.value} </strong>
+                      ))}
+
                     </li>
                   ))}
                 </ul>

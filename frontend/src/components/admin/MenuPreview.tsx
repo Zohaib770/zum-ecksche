@@ -54,7 +54,7 @@ const MenuPreview: React.FC = () => {
     <div className="bg-white p-6 rounded-lg">
       <h3 className="text-lg font-semibold mb-6">Speisekarte Vorschau</h3>
       <div className="space-y-4">
-        {categories.map((cat) => (
+        {categories.map((cat, catIndex) => (
           <div key={cat._id?.toString()} className="border rounded-lg overflow-hidden">
             <div
               className="flex justify-between items-center p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition"
@@ -70,7 +70,7 @@ const MenuPreview: React.FC = () => {
                     />
                   )}
                   <h3 className="font-medium">
-                    {cat.name} <span className="text-gray-600">({cat.description})</span>
+                    {`${catIndex + 1}.`} {cat.name} {cat.description && <span className="text-gray-600">({cat.description})</span>}
                   </h3>
                 </div>
 
@@ -106,8 +106,8 @@ const MenuPreview: React.FC = () => {
             {expandedCategories[String(cat._id)] && (
               <div className="p-4">
                 <div className="space-y-3">
-                  {(foodsByCategory[String(cat._id)] || []).map((food) => (
-                    <FoodItem key={String(food._id)} food={food} />
+                  {(foodsByCategory[String(cat._id)] || []).map((food, foodIndex) => (
+                    <FoodItem key={String(food._id)} food={food} index={`${catIndex + 1}.${foodIndex + 1}`} />
                   ))}
                 </div>
               </div>
@@ -119,11 +119,12 @@ const MenuPreview: React.FC = () => {
   );
 };
 
-const FoodItem: React.FC<{ food: Food }> = ({ food }) => (
+const FoodItem: React.FC<{ food: Food; index: string }> = ({ food, index }) => (
   <div className="pb-3 border-b last:border-0">
     <div className="flex justify-between">
       <div>
-        <h4 className="font-medium">{food.name} <span className="font-medium">{food.price}</span></h4>
+        <h4 className="font-medium">
+          {index}. {food.name} <span className="font-medium">{food.price}€</span></h4>
         {food.description && <p className="text-sm text-gray-600">{food.description}</p>}
       </div>
     </div>

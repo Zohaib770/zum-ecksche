@@ -1,5 +1,5 @@
 import { axiosPublic, axiosPrivate } from './AxiosInstance.tsx';
-import { Category, Food, Option, Order } from '../types/Interfaces.tsx';
+import { Category, Food, Option, Order, DeliveryZone, Extra } from '../types/Interfaces.tsx';
 
 const Apis = {
 
@@ -68,9 +68,9 @@ const Apis = {
     }
   },
 
-  addFood: async (foodData: Omit<Food, '_id'>) => {
+  addFood: async (food: Food) => {
     try {
-      await axiosPrivate.post('/api/create-food', foodData);
+      await axiosPrivate.post('/api/create-food', food);
     } catch (error) {
       console.error('Fehler beim Hinzufügen der Speise:', error);
       throw error;
@@ -82,17 +82,6 @@ const Apis = {
       await axiosPrivate.post('/api/delete-food', { foodId: id });
     } catch (error) {
       console.error('Fehler beim delete der Food:', error);
-      throw error;
-    }
-  },
-
-  //option
-  fetchOption: async () => {
-    try {
-      const response = await axiosPublic.get('/api/fetch-option');
-      return response.data as Option[];
-    } catch (error) {
-      console.error('Fehler beim Abrufen der Option:', error);
       throw error;
     }
   },
@@ -129,6 +118,41 @@ const Apis = {
       throw error;
     }
   },
+
+  //option
+  fetchOption: async () => {
+    try {
+      const response = await axiosPublic.get('/api/fetch-option');
+      return response.data as Option[];
+    } catch (error) {
+      console.error('Fehler beim Abrufen der Option:', error);
+      throw error;
+    }
+  },
+
+  //deliveryzone
+  fetchDeliveryzone: async () => {
+    try {
+      const response = await axiosPublic.get('/api/fetch-deliveryzone');
+      console.log("response", response);
+      return response.data as DeliveryZone[];
+    } catch (error) {
+      console.error('Fehler beim Abrufen der deliveryzone:', error);
+      throw error;
+    }
+  },
+
+  //extra
+  fetchExtra: async () => {
+    try {
+      const response = await axiosPublic.get('/api/fetch-extra');
+      return response.data as Extra[];
+    } catch (error) {
+      console.error('Fehler beim Abrufen der Extra:', error);
+      throw error;
+    }
+  },
+
 };
 
 export default Apis;

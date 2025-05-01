@@ -29,6 +29,7 @@ export interface Food {
 export interface CartItem {
   _id?: number;
   name: string;
+  quantity: number;
   price: string;
   options?: Option[];
   comment: string;
@@ -50,12 +51,28 @@ export interface PersonalDetail {
   phone: string
 }
 
+export interface DeliveryZone {
+  name: string,
+  distance: string,
+  min_order_price: number,
+  delivery_fee: number
+}
+
+export interface Extra {
+  category: string,
+  value: {
+    name: string,
+    price: number
+  }
+}
+
 export interface Order {
-  _id?: number;
+    _id?: number;
   cartItem: CartItem[];
   orderType: 'delivery' | 'pickup';
   personalDetail: PersonalDetail;
   deliveryAddress?: DeliveryAddress;
+  price: number;
   paymentMethod: 'cash' | 'online';
   status: string;
   createdAt: string;
