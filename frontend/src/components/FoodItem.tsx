@@ -1,65 +1,126 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
-import { Food, CartItem, Option } from '../types/Interfaces';
+import { Food, CartItem, OptionValue, Extra } from '../types/Interfaces';
+import Apis from "../api/Apis";
+import { useFoodContext } from "../context/FoodContext";
 
 export default function FoodItem() {
+
+  const { categories } = useFoodContext();
   const navigate = useNavigate();
   const { state } = useLocation();
+  const [availableExtras, setAvailableExtras] = useState<Extra[]>([]);
   const food: Food | undefined = state?.food;
   const { addToCart } = useCart();
 
   const [cartItem, setCartItem] = useState<CartItem>({
     name: food?.name ?? '',
+    quantity: 1,
     price: food?.price ?? '0',
     options: [],
     comment: ''
   });
 
+  const [selectedSize, setSelectedSize] = useState<OptionValue>();
+  const [selectedExtraBasePrice, setSelectedExtraBasePrice] = useState<string>();
+
   if (!food) {
     return <div className="text-center p-8">Keine Speise ausgewählt.</div>;
   }
 
-  const calculateTotalPrice = (basePrice: string, options: Option[] = []): string => {
-    for (const option of options) {
-      const selectedValue = option.values?.[0];
-      if (selectedValue?.price) {
-        return parseFloat(selectedValue.price).toFixed(2);
-      }
+  // Find size options if they exist
+  const sizeOptions = food.options?.find(opt => opt.name === 'size')?.values || [];
+  const extraOptions = food.options?.find(opt => opt.name === 'extras')?.values || [];
+
+  const calculateTotalPrice = (): string => {
+
+    let basePrice = parseFloat(cartItem.price || food.price || '0');
+
+    const extrasPrice = cartItem.options
+      ?.filter(opt => opt.name === 'extra')
+      .flatMap(opt => opt.values?.map(val => parseFloat(val.price || '0')) || [])
+      .reduce((sum, price) => sum + price, 0) || 0;
+
+    const total = (basePrice + extrasPrice) * cartItem.quantity;
+    return total.toFixed(2);
+    // const firstOptionWithPrice = food.options?.[0]?.values?.[0]?.price;
+    // const basePrice = firstOptionWithPrice ?? food.price;
+    // return `${calculateTotalItemPrice(basePrice, cartItem.quantity)}`;
+
+    /* let basePrice = food.price;
+    if (selectedSize?.price) {
+      basePrice = selectedSize.price;
     }
-  
-    return parseFloat(basePrice || '0').toFixed(2);
+
+    // Add prices from selected extras
+    const extrasPrice = cartItem.options
+      ?.filter(opt => opt.name === 'extra')
+      .flatMap(opt => opt.values?.map(val => parseFloat(val.price || '0')) || [])
+      .reduce((sum, price) => sum + price, 0) || 0;
+
+    const total = parseFloat(basePrice || '0') + extrasPrice;
+    return total.toFixed(2); */
   };
-  
 
-  const handleOptionChange = (optionName: string, value: string, price?: string) => {
-    setCartItem((prev) => {
-      const existingOptionIndex = prev.options?.findIndex((o) => o.name === optionName) ?? -1;
-      let updatedOptions = [...(prev.options || [])];
+  const handleSizeChange = (value: OptionValue) => {
+    setSelectedSize(value);
 
-      if (existingOptionIndex >= 0) {
-        // Update existing option
-        updatedOptions[existingOptionIndex] = {
-          name: optionName,
-          values: [{ value, price }],
-        };
+    const ofenfrischePizzaCategory = categories.find(
+      (category) => category.name === "Ofenfrische Pizza"
+    );
+    // console.log("📦 Ofenfrische Pizza Category:", ofenfrischePizzaCategory);
+    if (!ofenfrischePizzaCategory?.options) return;
+
+    const extrasOption = ofenfrischePizzaCategory.options.find(option =>
+      option.name.toLowerCase().includes("extras")
+    );
+
+    const matchedValue = extrasOption?.values?.find(val =>
+      value.value.trim().toLowerCase().includes(val.value.trim().toLowerCase())
+    );
+
+    const matchedPrice = matchedValue?.price;
+    setSelectedExtraBasePrice(matchedPrice);
+
+
+    setCartItem(prev => ({
+      ...prev,
+      price: value.price || food.price,
+      options: prev.options?.filter(opt => opt.name !== 'size') || []
+    }));
+  };
+
+  const handleExtraChange = (extraName: string, isChecked: boolean) => {
+    setCartItem(prev => {
+      const existingExtras = prev.options?.find(o => o.name === 'extra')?.values || [];
+      let newExtras;
+
+      const price = selectedExtraBasePrice?.toString() || '0';
+
+      if (isChecked) {
+        newExtras = [...existingExtras, { value: extraName, price }];
       } else {
-        // Add new option
-        updatedOptions.push({
-          name: optionName,
-          values: [{ value, price }],
-        });
+        newExtras = existingExtras.filter(e => e.value !== extraName);
       }
 
-      // Calculate new total price
-      const newPrice = calculateTotalPrice(food.price, updatedOptions);
+      const otherOptions = prev.options?.filter(o => o.name !== 'extra') || [];
 
       return {
         ...prev,
-        options: updatedOptions,
-        price: newPrice
+        options: [
+          ...otherOptions,
+          ...(newExtras.length > 0 ? [{ name: 'extra', values: newExtras }] : [])
+        ]
       };
     });
+  };
+
+  const handleQuantityChange = (change: number) => {
+    setCartItem(prev => ({
+      ...prev,
+      quantity: Math.max(1, prev.quantity + change)
+    }));
   };
 
   const handleCommentChange = (comment: string) => {
@@ -67,58 +128,138 @@ export default function FoodItem() {
   };
 
   const handleAddToCart = () => {
+    if (!selectedSize && sizeOptions.length > 0) {
+      alert('Bitte wählen Sie eine Größe aus');
+      return;
+    }
+
     const completeCartItem: CartItem = {
       ...cartItem,
       name: food.name,
+      price: calculateTotalPrice(),
+      options: [
+        ...(selectedSize ? [{
+          name: 'size',
+          values: [{ value: selectedSize.value, price: selectedSize.price }]
+        }] : []),
+        ...(cartItem.options || [])
+      ]
     };
 
     addToCart(completeCartItem);
-
-    // Reset form
-    setCartItem({
-      name: food.name,
-      price: food.price, // Zurücksetzen auf Basispreis
-      options: [],
-      comment: ""
-    });
-
     navigate('/cart');
   };
 
+  useEffect(() => {
+    const fetchExtras = async () => {
+      try {
+        const result = await Apis.fetchExtra();
+        const pizzaExtras = result.filter((extra: any) => extra.category === 'Ofenfrische Pizza');
+        setAvailableExtras(pizzaExtras);
+      } catch (error) {
+        console.error("Fehler beim Laden der Extras:", error);
+      }
+    };
+
+    if (food.category === 'Ofenfrische Pizza') {
+      fetchExtras();
+    }
+  }, [food.category]);
+
   return (
     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-auto mt-10 shadow-lg">
-      <h2 className="text-2xl font-bold mb-2">{food.name}</h2>
+      <h2 className="text-2xl font-bold mb-2">
+        <span>{cartItem.quantity} x {food.name} </span>
+        <button onClick={() => handleQuantityChange(-1)} className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-0 px-2 rounded">
+          -
+        </button>
+        <button onClick={() => handleQuantityChange(1)} className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-0 px-2 rounded">
+          +
+        </button>
+      </h2>
+
       <p className="text-gray-600 mb-6">{food.description}</p>
+
       <p className="text-lg font-semibold mb-6">
-        {food.price}€
+        {calculateTotalPrice()}€
       </p>
 
-      {food.options?.map((option, i) => (
-        <div key={i} className="mb-4">
+      {/* Size Selection (Radio Buttons) */}
+      {sizeOptions.length > 0 && (
+        <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            {option.name}
+            Größe*
           </label>
           <div className="space-y-2">
-            {option.values?.map((val, j) => (
-              <label key={j} className="flex items-center">
+            {sizeOptions.map((size, i) => (
+              <label key={i} className="flex items-center">
                 <input
                   type="radio"
-                  name={option.name}
-                  value={val.value}
-                  checked={cartItem.options?.find(o => o.name === option.name)?.values?.[0]?.value === val.value}
-                  onChange={() => handleOptionChange(option.name, val.value, val.price)}
+                  name="size"
+                  value={size.value}
+                  checked={selectedSize?.value === size.value}
+                  onChange={() => handleSizeChange(size)}
                   className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300"
                 />
                 <span className="ml-2 text-sm text-gray-700">
-                  {val.value}
-                  {val.price && ` (+${val.price}€)`}
+                  {size.value}
+                  {size.price && ` (${size.price}€)`}
                 </span>
               </label>
             ))}
           </div>
         </div>
-      ))}
+      )}
 
+      {/* Extras (only shown after size is selected) */}
+      {selectedSize && availableExtras.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Extras</h3>
+          <div className="grid grid-cols-2 gap-2">
+            {availableExtras.map((extra, index) => (
+              Array.isArray(extra.value) ? (
+                extra.value.map((item, itemIndex) => (
+                  <label key={`${index}-${itemIndex}`} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={cartItem.options?.some(
+                        opt => opt.name === 'extra' &&
+                          opt.values?.some(val => val.value === item.name)
+                      )}
+                      onChange={(e) => handleExtraChange(
+                        item.name, e.target.checked)}
+                      className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded"
+                    />
+                    <span className="text-sm text-gray-700">
+                      {item.name}
+                      {` (+${selectedExtraBasePrice}€)`}
+                    </span>
+                  </label>
+                ))
+              ) : (
+                <label key={index} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={cartItem.options?.some(
+                      opt => opt.name === 'extra' &&
+                        opt.values?.some(val => val.value === extra.value.name)
+                    )}
+                    onChange={(e) => handleExtraChange(
+                      extra.value.name, e.target.checked)}
+                    className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded"
+                  />
+                  <span className="text-sm text-gray-700">
+                    {extra.value.name}
+                    {extra.value.price > 0 && ` (+${extra.value.price}€)`}
+                  </span>
+                </label>
+              )
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Comment */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Kommentar

@@ -1,14 +1,17 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import Apis from '../api/Apis';
-import { Category, Food, Option } from '../types/Interfaces';
+import { Food, Option } from '../types/Interfaces';
 import { useNavigate } from "react-router-dom";
+import { useFoodContext } from "../context/FoodContext";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
-const FoodList: React.FC = () => {
+const FoodList = () => {
+  const {
+    categories,
+    foodsByCategory,
+  } = useFoodContext();
+
   const navigate = useNavigate();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [foodsByCategory, setFoodsByCategory] = useState<Record<string, Food[]>>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [scrollPosition, setScrollPosition] = useState(0);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -19,33 +22,6 @@ const FoodList: React.FC = () => {
     return (el: HTMLDivElement | null) => {
       categoryElementsRef.current[categoryId] = el;
     };
-  }, []);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const fetchedCategories = await Apis.fetchCategories();
-        setCategories(fetchedCategories);
-        const groupedFoods: Record<string, Food[]> = {};
-
-        for (const cat of fetchedCategories) {
-          const catId = String(cat._id ?? '');
-          const foods = await Apis.fetchFoodsByCategory(catId);
-          groupedFoods[catId] = foods;
-          setExpandedCategories(prev => ({ ...prev, [catId]: false })); // Initially all collapsed
-        }
-
-        setFoodsByCategory(groupedFoods);
-        if (fetchedCategories.length > 0) {
-          setSelectedCategoryId(String(fetchedCategories[0]._id));
-        }
-
-      } catch (error) {
-        console.error('Fehler beim Laden der Daten:', error);
-      }
-    };
-
-    loadData();
   }, []);
 
   // Handle search - expand categories with matching foods
