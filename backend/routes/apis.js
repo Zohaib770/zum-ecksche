@@ -3,6 +3,8 @@ const { loginUser } = require('../controllers/authController');
 const categoryController = require('../controllers/categoryController');
 const foodController = require('../controllers/foodController');
 const optionController = require('../controllers/optionController')
+const deliveryZoneController = require('../controllers/deliveryZoneController')
+const extraController = require('../controllers/extraController')
 const orderController = require('../controllers/orderController')
 const { verifyToken } = require('../config/jwtVerify')
 
@@ -24,6 +26,12 @@ router.post('/delete-food', foodController.deleteFood);
 
 //option
 router.get('/fetch-option', optionController.getOption);
+
+//deliveryzone
+router.get('/fetch-deliveryzone', deliveryZoneController.getDeliveryZone);
+
+//extra
+router.get('/fetch-extra', extraController.getExtra);
 
 //order
 router.post('/create-order', orderController.createOrder);

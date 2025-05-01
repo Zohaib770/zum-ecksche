@@ -7,6 +7,7 @@ exports.createFood = async (req, res) => {
     await food.save();
     res.status(201).json(food);
   } catch (error) {
+    console.log(error);
     res.status(400).json({ message: error.message });
   }
 };

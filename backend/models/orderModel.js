@@ -17,6 +17,7 @@ const PersonalDetailSchema = new mongoose.Schema({
 
 const cartItemSchema = new mongoose.Schema({
     name: { type: String, required: true },
+    quantity: { type: Number },
     price: { type: String, required: true },
     options: [optionSchema],
     comment: { type: String },
@@ -30,6 +31,7 @@ const OrderSchema = new mongoose.Schema({
   deliveryAddress: { type: DeliveryAddressSchema, required: function () {
     return this.orderType === 'delivery';
   }},
+  price: {type: String},
   status: { type: String, default: 'new' },
   createdAt: { type: String, default: () => new Date().toISOString() }
 });
