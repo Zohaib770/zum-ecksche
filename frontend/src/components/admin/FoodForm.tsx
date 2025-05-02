@@ -183,7 +183,8 @@ const FoodForm: React.FC = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Preis*</label>
               <input
-                type="text"
+                type="number"
+                step="0.5"
                 value={food.price}
                 onChange={(e) => setFood({ ...food, price: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
