@@ -15,7 +15,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onMenuClick }) => {
             <div
                 className="absolute inset-0 bg-cover bg-center"
                 style={{
-                    backgroundImage: "url('src/assets/hero-section.jpg')",
+                    backgroundImage: "url('src/assets/herosection.jpg')",
                     zIndex: 0,
                 }}
             />
