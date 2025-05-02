@@ -5,7 +5,5 @@ frontend/eslint.config.js
 node_modules
 frontend/.gitignore
 frontend/package-lock.json
-frontend/tsconfig.app.json
-frontend/tsconfig.node.json
 frontend/vite.config.ts
 frontend/src/vite-env.d.ts
