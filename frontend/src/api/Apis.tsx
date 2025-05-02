@@ -1,5 +1,5 @@
-import { axiosPublic, axiosPrivate } from './AxiosInstance.tsx';
-import { Category, Food, Option, Order, DeliveryZone, Extra } from '../types/Interfaces.tsx';
+import { axiosPublic, axiosPrivate } from './AxiosInstance';
+import { Category, Food, Option, Order, DeliveryZone, Extra } from '../types/Interfaces';
 
 const Apis = {
 
