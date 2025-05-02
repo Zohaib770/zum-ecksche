@@ -1,6 +1,6 @@
 export interface OptionValue {
   value: string;
-  price?: string;
+  price?: number;
 }
 
 export interface Option {
@@ -21,7 +21,7 @@ export interface Food {
   _id?: number;
   name: string;
   description: string;
-  price: string;
+  price: number;
   category: string;
   options?: Option[];
 }
@@ -30,7 +30,7 @@ export interface CartItem {
   _id?: number;
   name: string;
   quantity: number;
-  price: string;
+  price: number;
   options?: Option[];
   comment: string;
 }

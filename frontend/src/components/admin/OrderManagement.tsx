@@ -113,7 +113,7 @@ const OrderManagement = () => {
   };
 
   const calculateTotal = (order: Order): string => {
-    return order.cartItem.reduce((sum, item) => sum + parseFloat(item.price), 0).toFixed(2);
+    return order.cartItem.reduce((sum, item) => sum + item.price, 0).toFixed(2);
   };
 
   const handlePrint = (order: Order) => {
