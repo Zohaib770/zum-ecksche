@@ -9,7 +9,7 @@ import WarenkorbIcon from '../assets/icons/cart.jpeg';
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
     const t = texts.Navbar;
     const { items } = useCart();
     const { isLoggedIn, logout } = useAuth();
