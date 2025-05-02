@@ -1,6 +1,7 @@
 import React from "react";
 import { FaClock, FaEuroSign } from "react-icons/fa";
 import texts from "../lang/de.json";
+import heroImg from "../assets/herosection.jpg";
 
 interface HeroSectionProps {
     onMenuClick: () => void;
@@ -15,7 +16,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onMenuClick }) => {
             <div
                 className="absolute inset-0 bg-cover bg-center"
                 style={{
-                    backgroundImage: "url('src/assets/herosection.jpg')",
+                    backgroundImage: `url(${heroImg})`,
                     zIndex: 0,
                 }}
             />
