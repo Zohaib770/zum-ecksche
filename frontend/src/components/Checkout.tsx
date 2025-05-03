@@ -13,8 +13,9 @@ const CheckoutForm: React.FC = () => {
   const { items, clearCart } = useCart();
   const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'online'>('cash');
-  const [onlinePaymentMethod, setOnlinePaymentMethod] = useState<'paypal' | 'giro' | 'googlepay' | null>(null);
+  const [onlinePaymentMethod, setOnlinePaymentMethod] = useState<'paypal' | 'giro' | null>(null);
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
+  const [showPayPalModal, setShowPayPalModal] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress>({
     street: '',
     postalCode: 0,
@@ -116,7 +117,6 @@ const CheckoutForm: React.FC = () => {
         clearCart();
         navigate('/erfolg');
       }
-      // For online payments, just set the payment method (PayPal will handle the rest)
     } catch (error) {
       console.error('Fehler beim Abschicken der Bestellung:', error);
       toast.error('Fehler beim Abschicken der Bestellung. Bitte versuchen Sie es erneut.');
@@ -331,7 +331,7 @@ const CheckoutForm: React.FC = () => {
           <div className="mt-4 space-y-3">
             <h3 className="text-lg font-medium">Online-Zahlungsmethode wählen:</h3>
             <div className="space-y-2">
-              {['paypal', 'giro', 'googlepay'].map((method) => (
+              {['paypal', 'giro'].map((method) => (
                 <label key={method} className="flex items-center space-x-3">
                   <input
                     type="radio"
@@ -343,7 +343,6 @@ const CheckoutForm: React.FC = () => {
                   <span>
                     {method === 'paypal' && 'PayPal'}
                     {method === 'giro' && 'Giro Business Account'}
-                    {method === 'googlepay' && 'Google Pay / Apple Pay'}
                   </span>
                 </label>
               ))}
@@ -368,49 +367,53 @@ const CheckoutForm: React.FC = () => {
           >
             Weiter bestellen
           </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
-          >
-            Bestellung abschließen
-          </button>
+          {/* Show either PayPal button or regular submit button */}
+          {paymentMethod === 'online' && onlinePaymentMethod === 'paypal' ? (
+            <button
+              type="button"
+              onClick={() => setShowPayPalModal(true)} // Add state for this if needed
+              className="w-full py-3 px-4 rounded-lg"
+            >
+              <PayPalPayment
+                order={{
+                  cartItem: items,
+                  personalDetail,
+                  deliveryAddress,
+                  price: calculateTotal(),
+                  orderType,
+                  paymentMethod,
+                  paypalOrderId: '',
+                  paypalTransactionId: '',
+                  status: 'pending_payment',
+                  createdAt: new Date().toISOString()
+                }}
+                onSuccess={() => {
+                  toast.success('Zahlung erfolgreich!');
+                  clearCart();
+                  // navigate('/erfolg');
+                }}
+                onError={(error) => {
+                  toast.error('Zahlung fehlgeschlagen');
+                  console.error(error);
+                }}
+                onCancel={() => {
+                  toast.info('Zahlung wurde abgebrochen');
+                  setShowPayPalModal(false);
+                }}
+              />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
+            >
+              Bestellung abschließen
+            </button>
+          )}
         </div>
       </div>
 
-      {/* PayPal Payment Modal */}
-      {paymentMethod === 'online' && onlinePaymentMethod === 'paypal' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <PayPalPayment
-              order={{
-                cartItem: items,
-                personalDetail,
-                // deliveryAddress: orderType === 'delivery' ? deliveryAddress : undefined,
-                deliveryAddress: deliveryAddress,
-                price: calculateTotal(),
-                orderType,
-                paymentMethod,
-                onlinePaymentMethod,
-                paypalOrderId: '',
-                paypalTransactionId: '',
-                status: 'pending_payment',
-                createdAt: new Date().toISOString()
-              }}
-              onSuccess={() => {
-                toast.success('Zahlung erfolgreich!');
-                clearCart();
-                navigate('/erfolg');
-              }}
-              onError={(error) => {
-                toast.error('Zahlung fehlgeschlagen');
-                console.error(error);
-              }}
-              onCancel={() => toast.info('Zahlung wurde abgebrochen')}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -63,7 +63,8 @@ const PayPalPayment: React.FC<PayPalProps> = ({ order, onSuccess, onError, onCan
   const buttonStyles = {
     layout: 'vertical' as const,
     shape: 'rect' as const,
-    color: 'gold' as const,
+    color: 'blue' as const,
+    label: 'paypal' as const, 
     tagline: false,
     height: 48
   };
