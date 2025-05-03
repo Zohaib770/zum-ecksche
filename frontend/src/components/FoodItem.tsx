@@ -1,67 +1,40 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
-import { Food, CartItem, OptionValue, Extra } from '../types/Interfaces';
+import { Food, CartItem, Option, OptionValue, Extra } from '../types/Interfaces';
 import Apis from "../api/Apis";
 import { useFoodContext } from "../context/FoodContext";
+import { convertPriceFromDotToComma } from "../utils/helpFunctions";
 
 export default function FoodItem() {
-
   const { categories } = useFoodContext();
-  const navigate = useNavigate();
-  const { state } = useLocation();
-  const [availableExtras, setAvailableExtras] = useState<Extra[]>([]);
-  const food: Food | undefined = state?.food;
   const { addToCart } = useCart();
 
+  const navigate = useNavigate();
+
+  const { state } = useLocation();
+  const food: Food | undefined = state?.food;
+
+  const [availableExtras, setAvailableExtras] = useState<Extra[]>([]);
+
+  const [totalPrice, setTotalPrice] = useState<number>(food?.price || 0);
   const [cartItem, setCartItem] = useState<CartItem>({
     name: food?.name ?? '',
     quantity: 1,
-    price: food?.price ?? '0',
+    price: food?.price ?? 0,
     options: [],
     comment: ''
   });
 
   const [selectedSize, setSelectedSize] = useState<OptionValue>();
-  const [selectedExtraBasePrice, setSelectedExtraBasePrice] = useState<string>();
+  const [selectedExtraBasePrice, setSelectedExtraBasePrice] = useState<number>(0);
 
   if (!food) {
     return <div className="text-center p-8">Keine Speise ausgewählt.</div>;
   }
 
-  // Find size options if they exist
   const sizeOptions = food.options?.find(opt => opt.name === 'size')?.values || [];
   const extraOptions = food.options?.find(opt => opt.name === 'extras')?.values || [];
-
-  const calculateTotalPrice = (): string => {
-
-    let basePrice = parseFloat(cartItem.price || food.price || '0');
-
-    const extrasPrice = cartItem.options
-      ?.filter(opt => opt.name === 'extra')
-      .flatMap(opt => opt.values?.map(val => parseFloat(val.price || '0')) || [])
-      .reduce((sum, price) => sum + price, 0) || 0;
-
-    const total = (basePrice + extrasPrice) * cartItem.quantity;
-    return total.toFixed(2);
-    // const firstOptionWithPrice = food.options?.[0]?.values?.[0]?.price;
-    // const basePrice = firstOptionWithPrice ?? food.price;
-    // return `${calculateTotalItemPrice(basePrice, cartItem.quantity)}`;
-
-    /* let basePrice = food.price;
-    if (selectedSize?.price) {
-      basePrice = selectedSize.price;
-    }
-
-    // Add prices from selected extras
-    const extrasPrice = cartItem.options
-      ?.filter(opt => opt.name === 'extra')
-      .flatMap(opt => opt.values?.map(val => parseFloat(val.price || '0')) || [])
-      .reduce((sum, price) => sum + price, 0) || 0;
-
-    const total = parseFloat(basePrice || '0') + extrasPrice;
-    return total.toFixed(2); */
-  };
 
   const handleSizeChange = (value: OptionValue) => {
     setSelectedSize(value);
@@ -69,9 +42,7 @@ export default function FoodItem() {
     const ofenfrischePizzaCategory = categories.find(
       (category) => category.name === "Ofenfrische Pizza"
     );
-    // console.log("📦 Ofenfrische Pizza Category:", ofenfrischePizzaCategory);
     if (!ofenfrischePizzaCategory?.options) return;
-
     const extrasOption = ofenfrischePizzaCategory.options.find(option =>
       option.name.toLowerCase().includes("extras")
     );
@@ -79,14 +50,12 @@ export default function FoodItem() {
     const matchedValue = extrasOption?.values?.find(val =>
       value.value.trim().toLowerCase().includes(val.value.trim().toLowerCase())
     );
-
-    const matchedPrice = matchedValue?.price;
+    const matchedPrice = matchedValue?.price || 0;
     setSelectedExtraBasePrice(matchedPrice);
-
 
     setCartItem(prev => ({
       ...prev,
-      price: value.price || food.price,
+      price: value.price!,
       options: prev.options?.filter(opt => opt.name !== 'size') || []
     }));
   };
@@ -94,12 +63,13 @@ export default function FoodItem() {
   const handleExtraChange = (extraName: string, isChecked: boolean) => {
     setCartItem(prev => {
       const existingExtras = prev.options?.find(o => o.name === 'extra')?.values || [];
-      let newExtras;
-
-      const price = selectedExtraBasePrice?.toString() || '0';
+      let newExtras: OptionValue[];
 
       if (isChecked) {
-        newExtras = [...existingExtras, { value: extraName, price }];
+        newExtras = [...existingExtras, {
+          value: extraName,
+          price: selectedExtraBasePrice
+        }];
       } else {
         newExtras = existingExtras.filter(e => e.value !== extraName);
       }
@@ -110,7 +80,10 @@ export default function FoodItem() {
         ...prev,
         options: [
           ...otherOptions,
-          ...(newExtras.length > 0 ? [{ name: 'extra', values: newExtras }] : [])
+          ...(newExtras.length > 0 ? [{
+            name: 'extra',
+            values: newExtras
+          }] : [])
         ]
       };
     });
@@ -127,6 +100,16 @@ export default function FoodItem() {
     setCartItem(prev => ({ ...prev, comment }));
   };
 
+  const calculateCartItemPrice = (): number => {
+    const basePrice = Number(selectedSize?.price || food.price || 0);
+    const extrasPrice = cartItem.options
+      ?.filter(opt => opt.name === 'extra')
+      .flatMap(opt => opt.values || [])
+      .reduce((sum, val) => sum + Number(val.price || 0), 0) || 0;
+    const total = (Number(basePrice) + Number(extrasPrice));
+    return isNaN(total) ? 0 : total;
+  };
+
   const handleAddToCart = () => {
     if (!selectedSize && sizeOptions.length > 0) {
       alert('Bitte wählen Sie eine Größe aus');
@@ -136,11 +119,14 @@ export default function FoodItem() {
     const completeCartItem: CartItem = {
       ...cartItem,
       name: food.name,
-      price: calculateTotalPrice(),
+      price: calculateCartItemPrice(),
       options: [
         ...(selectedSize ? [{
           name: 'size',
-          values: [{ value: selectedSize.value, price: selectedSize.price }]
+          values: [{
+            value: selectedSize.value,
+            price: selectedSize.price || 0
+          }]
         }] : []),
         ...(cartItem.options || [])
       ]
@@ -166,6 +152,19 @@ export default function FoodItem() {
     }
   }, [food.category]);
 
+  useEffect(() => {
+    const calculateTotalPrice = (): number => {
+      const basePrice = Number(selectedSize?.price || food.price || 0);
+      const extrasPrice = cartItem.options
+        ?.filter(opt => opt.name === 'extra')
+        .flatMap(opt => opt.values || [])
+        .reduce((sum, val) => sum + Number(val.price || 0), 0) || 0;
+      const total = (Number(basePrice) + Number(extrasPrice)) * Number(cartItem.quantity);
+      return isNaN(total) ? 0 : total;
+    };
+
+    setTotalPrice(calculateTotalPrice());
+  }, [selectedSize, cartItem.options, cartItem.quantity, food.price]);
   return (
     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-auto mt-10 shadow-lg">
       <h2 className="text-2xl font-bold mb-2">
@@ -181,7 +180,7 @@ export default function FoodItem() {
       <p className="text-gray-600 mb-6">{food.description}</p>
 
       <p className="text-lg font-semibold mb-6">
-        {calculateTotalPrice()}€
+        {convertPriceFromDotToComma(totalPrice)} €
       </p>
 
       {/* Size Selection (Radio Buttons) */}
@@ -203,7 +202,7 @@ export default function FoodItem() {
                 />
                 <span className="ml-2 text-sm text-gray-700">
                   {size.value}
-                  {size.price && ` (${size.price}€)`}
+                  {size.price && ` (${convertPriceFromDotToComma(size.price)}€)`}
                 </span>
               </label>
             ))}
@@ -232,7 +231,7 @@ export default function FoodItem() {
                     />
                     <span className="text-sm text-gray-700">
                       {item.name}
-                      {` (+${selectedExtraBasePrice}€)`}
+                      {` (+${convertPriceFromDotToComma(selectedExtraBasePrice)}€)`}
                     </span>
                   </label>
                 ))
