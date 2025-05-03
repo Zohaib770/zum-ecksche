@@ -89,7 +89,8 @@ const Apis = {
   //order
   addOrder: async (order: Order) => {
     try {
-      await axiosPublic.post('/api/create-order', order);
+      const response = await axiosPublic.post('/api/create-order', order);
+      return response;
     } catch (error) {
       console.error('Fehler beim Abrufen der Option:', error);
       throw error;
@@ -134,7 +135,6 @@ const Apis = {
   fetchDeliveryzone: async () => {
     try {
       const response = await axiosPublic.get('/api/fetch-deliveryzone');
-      console.log("response", response);
       return response.data as DeliveryZone[];
     } catch (error) {
       console.error('Fehler beim Abrufen der deliveryzone:', error);
@@ -152,6 +152,43 @@ const Apis = {
       throw error;
     }
   },
+
+  //payment
+  paypalCreateOrder: async (orderData: Order) => {
+    try {
+      const response = await axiosPublic.post('/api/paypal-create-order', {
+        total: orderData.price,
+        currency: 'EUR',
+        items: orderData.cartItem.map(item => ({
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        customer: orderData.personalDetail
+      });
+      return response.data.id;
+    } catch (error) {
+      console.error('PayPal order creation failed:', error);
+      throw error;
+    }
+  },
+
+  paypalCaptureOrder: async (orderID: string, orderData: Order) => {
+    try {
+      const response = await axiosPublic.post('/api/paypal-capture-order', {
+        orderID,
+        orderData: {
+          ...orderData,
+          paymentMethod: 'online'
+        }
+      });
+      return response;
+    } catch (error) {
+      console.error('PayPal capture failed:', error);
+      throw error;
+    }
+  },
+
 
 };
 

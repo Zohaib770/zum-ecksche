@@ -3,28 +3,7 @@ import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Apis from '../api/Apis';
-
-interface Order {
-  cartItem: any[];
-  personalDetail: {
-    fullName: string;
-    email: string;
-    phone: string;
-  };
-  orderType: 'delivery' | 'pickup';
-  paymentMethod: 'cash' | 'online';
-  deliveryAddress?: {
-    street: string;
-    postalCode: string;
-    city: string;
-    floor: string;
-    comment: string;
-  };
-  price: number;
-  onlinePaymentMethod?: 'paypal' | 'giro' | 'googlepay' | null;
-  status: string;
-  createdAt: string;
-}
+import { Order } from '../types/Interfaces';
 
 interface PayPalProps {
   order: Order;
@@ -40,72 +19,71 @@ const PayPalPayment: React.FC<PayPalProps> = ({ order, onSuccess, onError, onCan
     intent: 'capture',
   };
 
-  const createOrder = (data: any, actions: any) => {
-    return actions.order.create({
-      purchase_units: [{
-        amount: {
-          value: order.price.toFixed(2),
-          currency_code: 'EUR'
-        },
-        description: `Bestellung bei ${'YOUR_SHOP_NAME'} vom ${new Date(order.createdAt).toLocaleDateString()}`,
-        payee: {
-          email_address: 'sb-dbskm41134471@business.example.com',
-        },
-        items: order.cartItem.map(item => ({
-          name: item.name,
-          quantity: item.quantity || 1,
-          unit_amount: {
-            currency_code: 'EUR',
-            value: item.price.toFixed(2)
-          }
-        }))
-      }],
-      application_context: {
-        brand_name: 'ZUM ECKSCHE', // This will appear in PayPal checkout
-        shipping_preference: 'NO_SHIPPING',
-        user_action: 'PAY_NOW', // Makes the Pay Now button appear
-        locale: 'de-DE' // Optional: Set to German locale
-      }
-    });
+  const createOrder = async (data: any, actions: any) => {
+    try {
+      const paypalOrderId = await Apis.paypalCreateOrder(order);
+      return paypalOrderId;
+    } catch (error) {
+      toast.error('Fehler bei der PayPal-Ordererstellung');
+      throw error;
+    }
   };
 
   const onApprove = async (data: any, actions: any) => {
     try {
-      const details = await actions.order.capture();
+      // 1. Capture payment
+      const captureResponse = await Apis.paypalCaptureOrder(data.orderID, order);
 
-      // Update order status to 'paid'
-      const updatedOrder = {
+      // 2. Update local order data with PayPal IDs
+      const completedOrder: Order = {
         ...order,
         status: 'paid',
-        paymentDetails: details // Store PayPal payment details
+        paymentMethod: 'online',
+        onlinePaymentMethod: 'paypal',
+        paypalOrderId: data.orderID,
+        paypalTransactionId: captureResponse.data.details.purchase_units[0]?.payments?.captures[0]?.id,
+        createdAt: new Date().toISOString()
       };
 
-      await Apis.addOrder(updatedOrder);
-      toast.success('Zahlung erfolgreich verarbeitet!');
-      onSuccess();
+      // 3. Save to your database
+      const dbResponse = await Apis.addOrder(completedOrder);
+
+      if (dbResponse) {
+        toast.success('Zahlung und Bestellung erfolgreich!');
+        onSuccess();
+      }
     } catch (error) {
-      console.error('PayPal payment error:', error);
-      toast.error('Zahlung fehlgeschlagen. Bitte versuchen Sie es erneut.');
+      console.error('Payment error:', error);
+      toast.error('Zahlung erfolgreich, aber Bestellspeicherung fehlgeschlagen');
       onError(error);
+
     }
-  };
+  }
 
   const buttonStyles = {
     layout: 'vertical' as const,
     shape: 'rect' as const,
     color: 'gold' as const,
+    tagline: false,
+    height: 48
   };
 
   return (
     <div className="paypal-container">
-      <PayPalScriptProvider options={initialOptions}>
+      <PayPalScriptProvider
+        options={{
+          ...initialOptions,
+          components: 'buttons',
+          "enable-funding": "paylater,venmo",
+          "disable-funding": "credit,card"
+        }}
+      >
         <PayPalButtons
           style={buttonStyles}
           createOrder={createOrder}
           onApprove={onApprove}
           onError={onError}
           onCancel={onCancel}
-          fundingSource="paypal"
         />
       </PayPalScriptProvider>
     </div>

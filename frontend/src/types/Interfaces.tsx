@@ -38,7 +38,7 @@ export interface CartItem {
 export interface DeliveryAddress {
   _id?: number,
   street: string,
-  postalCode: string,
+  postalCode: number,
   city: string,
   floor: string,
   comment: string,
@@ -69,11 +69,14 @@ export interface Extra {
 export interface Order {
     _id?: number;
   cartItem: CartItem[];
-  orderType: 'delivery' | 'pickup';
   personalDetail: PersonalDetail;
   deliveryAddress?: DeliveryAddress;
   price: number;
+  orderType: 'delivery' | 'pickup';
   paymentMethod: 'cash' | 'online';
+  onlinePaymentMethod?: 'paypal' | 'giro';
+  paypalOrderId: string,
+  paypalTransactionId: string,
   status: string;
   createdAt: string;
 }
