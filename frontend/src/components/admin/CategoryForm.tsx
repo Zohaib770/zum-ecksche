@@ -51,7 +51,7 @@ const CategoryForm: React.FC = () => {
         if (!valueExists) {
           existingOption.values = [
             ...(existingOption.values ?? []),
-            { value, price }
+            { value, price: Number(price) }
           ];
           toast.success('Option hinzugefügt');
         }

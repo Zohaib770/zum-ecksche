@@ -14,7 +14,7 @@ const FoodForm: React.FC = () => {
   const [food, setFood] = useState<Food>({
     name: "",
     description: "",
-    price: "",
+    price: 0,
     category: "",
     options: []
   });
@@ -63,6 +63,15 @@ const FoodForm: React.FC = () => {
     setFood(prev => {
       const existingOptionIndex = prev.options?.findIndex(opt => opt.name === currentOption.name) ?? -1;
 
+      const priceValue = currentOption.price
+        ? Number(currentOption.price)
+        : undefined;
+
+      // Ensure we don't set NaN
+      const safePriceValue = (priceValue !== undefined && !isNaN(priceValue))
+        ? priceValue
+        : undefined;
+
       if (existingOptionIndex >= 0) {
         // Update existing option
         const updatedOptions = [...(prev.options || [])];
@@ -70,7 +79,10 @@ const FoodForm: React.FC = () => {
           ...updatedOptions[existingOptionIndex],
           values: [
             ...(updatedOptions[existingOptionIndex].values || []),
-            { value: currentOption.value, price: currentOption.price || undefined }
+            {
+              value: currentOption.value,
+              price: safePriceValue  
+            }
           ]
         };
         return { ...prev, options: updatedOptions };
@@ -83,7 +95,10 @@ const FoodForm: React.FC = () => {
           ...(prev.options || []),
           {
             name: currentOption.name,
-            values: [{ value: currentOption.value, price: currentOption.price || undefined }]
+            values: [{
+              value: currentOption.value,
+              price: safePriceValue
+            }]
           }
         ]
       };
@@ -126,7 +141,7 @@ const FoodForm: React.FC = () => {
       setFood({
         name: "",
         description: "",
-        price: "",
+        price: 0,
         category: "",
         options: []
       });
@@ -186,7 +201,7 @@ const FoodForm: React.FC = () => {
                 type="number"
                 step="0.5"
                 value={food.price}
-                onChange={(e) => setFood({ ...food, price: e.target.value })}
+                onChange={(e) => setFood({ ...food, price: Number(e.target.value) })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 required
               />

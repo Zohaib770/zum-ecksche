@@ -7,7 +7,7 @@ interface Props {
 
 const OrderPrintView = React.forwardRef<HTMLDivElement, Props>(({ order }, ref) => {
     const calculateTotal = (): string => {
-        return order.cartItem.reduce((sum, item) => sum + parseFloat(item.price), 0).toFixed(2);
+        return order.cartItem.reduce((sum, item) => sum + item.price, 0).toFixed(2);
     };
 
     return (
