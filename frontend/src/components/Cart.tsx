@@ -11,7 +11,7 @@ const Cart: React.FC = () => {
 
   const calculateTotal = (): string => {
     const total = items.reduce((sum, item) => {
-      const basePrice = parseFloat(convertPriceFromCommaToDot(item.price));
+      const basePrice = item.price * item.quantity;
       return sum + basePrice;
     }, 0);
 
@@ -19,7 +19,7 @@ const Cart: React.FC = () => {
   };
 
   const handleGoToCheckout = () => {
-    const total = parseFloat(convertPriceFromCommaToDot(calculateTotal()));
+    const total = parseFloat(calculateTotal());
     if (total < 12) {
       toast.error('Mindestbestellwert ist 12 €');
       return;
@@ -57,12 +57,9 @@ const Cart: React.FC = () => {
                 <ul className="mt-2 text-sm text-gray-700">
                   {item.options.map((option, idx) => (
                     <li key={idx}>
-                      {/* {option.name}: <strong>{option.values?.[0]?.value}</strong> */}
-                     
                       {option.name}: {option.values?.map((val, index) => (
                         <strong key={index}> {val.value} </strong>
                       ))}
-
                     </li>
                   ))}
                 </ul>
@@ -75,7 +72,7 @@ const Cart: React.FC = () => {
               )}
 
               <p className="mt-2 font-medium">
-                Preis: {item.price}€
+                Preis: {item.quantity * item.price}€
               </p>
             </div>
           ))}

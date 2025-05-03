@@ -17,7 +17,7 @@ const CheckoutForm: React.FC = () => {
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress>({
     street: '',
-    postalCode: '',
+    postalCode: 0,
     city: '',
     floor: '',
     comment: ''
@@ -28,14 +28,17 @@ const CheckoutForm: React.FC = () => {
     phone: ''
   });
 
-  // Calculate total price
   const calculateTotal = (): number => {
-    const total = items.reduce((sum, item) => {
-      const normalizedPriceString = item.price.replace(',', '.');
-      return sum + parseFloat(normalizedPriceString);
-    }, 0);
-    return parseFloat(total.toFixed(2));
+    let total: number = 0;
+
+    for (const item of items) {
+      const price: number = item.price * item.quantity;
+      total += price;
+    }
+
+    return total;
   };
+
 
   // Handle form field changes
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +104,8 @@ const CheckoutForm: React.FC = () => {
         deliveryAddress: orderType === 'delivery' ? deliveryAddress : undefined,
         price: calculateTotal(),
         // onlinePaymentMethod: paymentMethod === 'online' ? onlinePaymentMethod : undefined,
+        paypalOrderId: '',
+        paypalTransactionId: '',
         status: paymentMethod === 'cash' ? 'new' : 'pending_payment',
         createdAt: new Date().toISOString()
       };
@@ -133,22 +138,20 @@ const CheckoutForm: React.FC = () => {
           <button
             type="button"
             onClick={() => setOrderType('delivery')}
-            className={`flex-1 py-2 px-4 rounded-md border ${
-              orderType === 'delivery'
-                ? 'bg-yellow-600 text-white border-yellow-600'
-                : 'bg-white border-gray-300'
-            }`}
+            className={`flex-1 py-2 px-4 rounded-md border ${orderType === 'delivery'
+              ? 'bg-yellow-600 text-white border-yellow-600'
+              : 'bg-white border-gray-300'
+              }`}
           >
             Lieferung
           </button>
           <button
             type="button"
             onClick={() => setOrderType('pickup')}
-            className={`flex-1 py-2 px-4 rounded-md border ${
-              orderType === 'pickup'
-                ? 'bg-yellow-600 text-white border-yellow-600'
-                : 'bg-white border-gray-300'
-            }`}
+            className={`flex-1 py-2 px-4 rounded-md border ${orderType === 'pickup'
+              ? 'bg-yellow-600 text-white border-yellow-600'
+              : 'bg-white border-gray-300'
+              }`}
           >
             Abholung
           </button>
@@ -305,22 +308,20 @@ const CheckoutForm: React.FC = () => {
           <button
             type="button"
             onClick={() => setPaymentMethod('cash')}
-            className={`flex-1 py-2 px-4 rounded-md border ${
-              paymentMethod === 'cash'
-                ? 'bg-yellow-600 text-white border-yellow-600'
-                : 'bg-white border-gray-300'
-            }`}
+            className={`flex-1 py-2 px-4 rounded-md border ${paymentMethod === 'cash'
+              ? 'bg-yellow-600 text-white border-yellow-600'
+              : 'bg-white border-gray-300'
+              }`}
           >
             Barzahlung
           </button>
           <button
             type="button"
             onClick={() => setPaymentMethod('online')}
-            className={`flex-1 py-2 px-4 rounded-md border ${
-              paymentMethod === 'online'
-                ? 'bg-yellow-600 text-white border-yellow-600'
-                : 'bg-white border-gray-300'
-            }`}
+            className={`flex-1 py-2 px-4 rounded-md border ${paymentMethod === 'online'
+              ? 'bg-yellow-600 text-white border-yellow-600'
+              : 'bg-white border-gray-300'
+              }`}
           >
             Online bezahlen
           </button>
@@ -385,11 +386,14 @@ const CheckoutForm: React.FC = () => {
               order={{
                 cartItem: items,
                 personalDetail,
+                // deliveryAddress: orderType === 'delivery' ? deliveryAddress : undefined,
+                deliveryAddress: deliveryAddress,
+                price: calculateTotal(),
                 orderType,
                 paymentMethod,
-                deliveryAddress: orderType === 'delivery' ? deliveryAddress : undefined,
-                price: calculateTotal(),
                 onlinePaymentMethod,
+                paypalOrderId: '',
+                paypalTransactionId: '',
                 status: 'pending_payment',
                 createdAt: new Date().toISOString()
               }}

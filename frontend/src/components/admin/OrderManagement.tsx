@@ -112,8 +112,8 @@ const OrderManagement = () => {
     setExpandedOrderId(prev => (prev === id ? null : id));
   };
 
-  const calculateTotal = (order: Order): string => {
-    return order.cartItem.reduce((sum, item) => sum + item.price, 0).toFixed(2);
+  const calculateTotal = (order: Order): number => {
+    return order.cartItem.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   };
 
   const handlePrint = (order: Order) => {
@@ -225,7 +225,7 @@ const OrderManagement = () => {
                         <ul className="list-disc list-inside">
                           {order.cartItem.map((item, i) => (
                             <li key={i} className="mb-2">
-                                {item.name} - {item.price}€
+                                {item.quantity} x {item.name} - {item.price * item.quantity}€
                               {item.options?.map((opt) => (
                                 <div key={opt.name} className="ml-4 text-sm text-gray-600">
                                   • {opt.name}: {opt.values?.map(v => v.value).join(', ')}

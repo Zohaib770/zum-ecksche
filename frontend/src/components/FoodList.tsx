@@ -224,7 +224,7 @@ const FoodList = () => {
                           {option.values?.map((val, j) => (
                             <span key={j} className="ml-2">
                               {val.value}
-                              {val.price && ` (${convertPriceFromDotToComma(val.price)}€)`}
+                              {val.price && `(${convertPriceFromDotToComma(val.price)} €)`}
                               {j < (option.values?.length || 0) - 1 ? ',' : ''}
                             </span>
                           ))}
@@ -254,7 +254,7 @@ const FoodList = () => {
                       <div className="flex justify-between">
                         <div>
                           <h4 className="font-medium">
-                            {food.name} <span className="font-medium">{food.price}</span>
+                            {food.name} <span className="font-medium">{convertPriceFromDotToComma(food.price)} €</span>
                           </h4>
                           {food.description && (
                             <p className="text-sm text-gray-600">{food.description}</p>
@@ -273,7 +273,7 @@ const FoodList = () => {
                           <span className="text-gray-600">{option.name}: </span>
                           {option.values?.map((val, j) => (
                             <span key={j} className="mr-2">
-                              {val.value} {val.price !== 0 && `(${val.price})`}
+                              {val.value} {val.price !== 0 && `(${convertPriceFromDotToComma(val.price)} €)`}
                             </span>
                           ))}
                         </div>
