@@ -6,6 +6,7 @@ const optionController = require('../controllers/optionController')
 const deliveryZoneController = require('../controllers/deliveryZoneController')
 const extraController = require('../controllers/extraController')
 const orderController = require('../controllers/orderController')
+const paymentController = require('../controllers/paymentController')
 const { verifyToken } = require('../config/jwtVerify')
 
 const router = express.Router();
@@ -37,5 +38,9 @@ router.get('/fetch-extra', extraController.getExtra);
 router.post('/create-order', orderController.createOrder);
 router.get('/fetch-all-order', verifyToken, orderController.getOrders);
 router.post('/update-order-status', verifyToken, orderController.updateOrderStatus)
+
+//payments
+router.post('/paypal-create-order', paymentController.paypalCreateOrder);
+router.post('/paypal-capture-order', paymentController.paypalCaptureOrder);
 
 module.exports = router;
