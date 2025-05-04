@@ -77,6 +77,16 @@ const Apis = {
     }
   },
 
+  updateFood: async (id: number, food: Food) => {
+    try {
+      const response = await axiosPrivate.put(`/api/update-food/${id}`, food);
+    return response.data;
+    } catch (error) {
+      console.error('Fehler beim bearbeiten der Speise:', error);
+      throw error;
+    }
+  },
+
   deleteFood: async (id: number) => {
     try {
       await axiosPrivate.post('/api/delete-food', { foodId: id });

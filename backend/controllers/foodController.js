@@ -35,6 +35,29 @@ exports.getFoods = async (req, res) => {
   }
 };
 
+exports.updateFood = async (req, res) => {
+  try {
+    console.log("update Food ENTER");
+    const id = req.params.id;
+    const food = req.body;          
+    const updatedFood = await Food.findByIdAndUpdate(
+      id,
+      food,
+      { new: true }
+    );
+
+    if (!updatedFood) {
+      return res.status(404).json({ message: 'Speise nicht gefunden.' });
+    }
+
+    console.log("Food erfolgreich aktualisiert");
+    res.status(200).json({ message: 'Speise erfolgreich aktualisiert.', food: updatedFood });
+  } catch (error) {
+    console.error("Fehler beim Aktualisieren der Speise:", error);
+    res.status(500).json({ message: 'Fehler beim Aktualisieren der Speise.', error: error.message });
+  }
+};
+
 exports.deleteFood = async (req, res) => {
   try {
     console.log("delete Food ENTER");

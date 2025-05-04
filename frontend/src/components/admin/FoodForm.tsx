@@ -10,6 +10,7 @@ const FoodForm: React.FC = () => {
   const [availableOptionsNames, setAvailableOptionsNames] = useState<Option[]>([]);
   const [availableCategoryNames, setAvailableCategoryNames] = useState<Category[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   const [food, setFood] = useState<Food>({
     name: "",
@@ -81,7 +82,7 @@ const FoodForm: React.FC = () => {
             ...(updatedOptions[existingOptionIndex].values || []),
             {
               value: currentOption.value,
-              price: safePriceValue  
+              price: safePriceValue
             }
           ]
         };
@@ -136,8 +137,14 @@ const FoodForm: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      await Apis.addFood(food);
-      toast.success('Speise erfolgreich hinzugefügt');
+      if (editingId) {
+        const res = await Apis.updateFood(editingId, food);
+        toast.success('Speise erfolgreich aktualisiert');
+      } else {
+        await Apis.addFood(food);
+        toast.success('Speise erfolgreich hinzugefügt');
+      }
+
       setFood({
         name: "",
         description: "",
@@ -145,10 +152,11 @@ const FoodForm: React.FC = () => {
         category: "",
         options: []
       });
+      setEditingId(null);
       await loadFoods();
     } catch (error) {
-      toast.error('Fehler beim Hinzufügen der Speise');
-      console.error("Error adding food:", error);
+      toast.error(editingId ? 'Fehler beim Aktualisieren der Speise' : 'Fehler beim Hinzufügen der Speise');
+      console.error("Error:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -160,15 +168,39 @@ const FoodForm: React.FC = () => {
       await Apis.deleteFood(id);
       toast.success('Food erfolgreich gelöscht');
       setAvailableFoods(prev => prev.filter(food => food._id !== id));
+      if (editingId === id) {
+        setEditingId(null);
+        setFood({
+          name: "",
+          description: "",
+          price: 0,
+          category: "",
+          options: []
+        });
+      }
     } catch (error) {
       toast.error('Fehler beim Löschen der Food');
     }
   };
 
+  const handleEdit = (foodToEdit: Food) => {
+    setEditingId(foodToEdit._id || null);
+    setFood({
+      name: foodToEdit.name || "",
+      description: foodToEdit.description || "",
+      price: foodToEdit.price || 0,
+      category: foodToEdit.category || "",
+      options: foodToEdit.options || []
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <>
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Neue Speise</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          {editingId ? 'Speise bearbeiten' : 'Neue Speise'}
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name Field */}
           <div>
@@ -309,14 +341,39 @@ const FoodForm: React.FC = () => {
             disabled={isSubmitting}
             className={`w-full bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded-md transition-colors mt-4 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            {isSubmitting ? 'Wird hinzugefügt...' : 'Speise hinzufügen'}
+            {isSubmitting
+              ? 'Wird verarbeitet...'
+              : editingId
+                ? 'Speise aktualisieren'
+                : 'Speise hinzufügen'}
           </button>
+
+          {editingId && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingId(null);
+                setFood({
+                  name: "",
+                  description: "",
+                  price: 0,
+                  category: "",
+                  options: []
+                });
+              }}
+              className="w-full mt-2 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors"
+            >
+              Abbrechen
+            </button>
+          )}
         </form>
       </div>
 
       <FoodPreview
         foods={availableFoods}
-        onDelete={handleDelete} />
+        onDelete={handleDelete}
+        onEdit={handleEdit}
+      />
     </>
   );
 };

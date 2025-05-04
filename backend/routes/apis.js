@@ -23,6 +23,7 @@ router.post('/delete-category',  verifyToken, categoryController.deleteCategory)
 router.post('/create-food', verifyToken, foodController.createFood);
 router.get('/fetch-foods-by-category/:categoryId', foodController.getFoodByCategory);
 router.get('/fetch-all-foods', foodController.getFoods);
+router.put('/update-food/:id', foodController.updateFood);
 router.post('/delete-food', foodController.deleteFood);
 
 //option
