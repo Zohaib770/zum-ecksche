@@ -293,44 +293,43 @@ const FoodForm: React.FC = () => {
 
             {/* Add New Option */}
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <select
                   value={currentOption.name}
                   onChange={(e) => setCurrentOption({ ...currentOption, name: e.target.value })}
-                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 >
-                  <option value="">Option</option>
-                  {availableOptionsNames.map((op) => (
-                    <option key={String(op._id)} value={op.name}>
-                      {op.name}
+                  <option value="">Option auswählen</option>
+                  {availableOptionsNames.map((option) => (
+                    <option key={String(option._id)} value={option.name}>
+                      {option.name}
                     </option>
                   ))}
                 </select>
-
-                <input
-                  type="text"
-                  placeholder="Wert"
-                  value={currentOption.value}
-                  onChange={(e) => setCurrentOption({ ...currentOption, value: e.target.value })}
-                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
-                />
-
-                <input
-                  type="number"
-                  placeholder="0"
-                  step="0.5"
-                  value={currentOption.price}
-                  onChange={(e) => setCurrentOption({ ...currentOption, price: e.target.value })}
-                  className="w-20 px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
-                />
-
-                <button
-                  type="button"
-                  onClick={addOption}
-                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
-                >
-                  +
-                </button>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <input
+                    type="text"
+                    placeholder="Wert"
+                    value={currentOption.value}
+                    onChange={(e) => setCurrentOption({ ...currentOption, value: e.target.value })}
+                    className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  />
+                  <input
+                    type="number"
+                    step="0.5"
+                    placeholder="Preis"
+                    value={currentOption.price}
+                    onChange={(e) => setCurrentOption({ ...currentOption, price: e.target.value })}
+                    className="w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={addOption}
+                    className="px-3 py-2 h-[42px] border border-transparent rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             </div>
           </div>
