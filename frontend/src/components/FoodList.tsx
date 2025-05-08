@@ -225,7 +225,7 @@ const FoodList = () => {
                           {option.values?.map((val, j) => (
                             <span key={j} className="ml-2">
                               {val.value}
-                              {val.price && `(${convertPriceFromDotToComma(val.price)} €)`}
+                              {val.price && ` (${convertPriceFromDotToComma(val.price)} €)`}
                               {j < (option.values?.length || 0) - 1 ? ',' : ''}
                             </span>
                           ))}
