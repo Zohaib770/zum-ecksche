@@ -15,7 +15,7 @@ function CookieBanner() {
             expires={150}
         >
             Diese Website verwendet Cookies, um die Benutzererfahrung zu verbessern.{" "}
-            <a href="/haftungsausschluss" className="underline text-white hover:text-gray-200 ml-1">
+            <a href="/info" className="underline text-white hover:text-gray-200 ml-1">
                 Mehr erfahren
             </a>
         </CookieConsent>
