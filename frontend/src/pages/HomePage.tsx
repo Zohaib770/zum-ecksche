@@ -18,7 +18,6 @@ const HomePage: React.FC = () => {
                 <FoodList />
             </main>
             <Footer />
-            <CookieBanner />
         </div>
     );
 };

@@ -11,6 +11,7 @@ import AdminPage from "./pages/AdminPage";
 import LoginPage from "./pages/LoginPage";
 
 import InfoPage from "./pages/InfoPage";
+import CookieBanner from './components/CookieBanner';
 
 function App() {
 
@@ -31,6 +32,7 @@ function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <CookieBanner />
     </>
   )
 }
