@@ -199,6 +199,23 @@ const Apis = {
     }
   },
 
+  stripeCreateOrder: async (order: Order) => {
+    try {
+      const response = await axiosPublic.post('/api/stripe-create-order', {
+        amount: order.price * 100, // Stripe erwartet Cent-Beträge
+        currency: 'eur',
+        metadata: {
+          orderId: order._id,
+          customerEmail: order.personalDetail.email,
+        },
+        payment_method_types: ['giropay'],
+      });
+      return response;
+    } catch (error) {
+      console.error('stripe order creation failed:', error);
+      throw error;
+    }
+  },
 
 };
 

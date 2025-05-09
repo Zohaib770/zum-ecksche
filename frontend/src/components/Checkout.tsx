@@ -7,6 +7,7 @@ import Apis from '../api/Apis';
 import { useNavigate } from 'react-router-dom';
 import { convertPriceFromDotToComma } from '../utils/helpFunctions';
 import PayPalPayment from './PayPalPayment';
+import BankTransferPayment from './BankTransferPayment';
 
 const CheckoutForm: React.FC = () => {
   const navigate = useNavigate();
@@ -402,6 +403,30 @@ const CheckoutForm: React.FC = () => {
                 }}
               />
             </button>
+          ) : paymentMethod === 'online' && onlinePaymentMethod === 'giro' ? (
+            <BankTransferPayment
+              order={{
+                cartItem: items,
+                personalDetail,
+                deliveryAddress,
+                price: calculateTotal(),
+                orderType,
+                paymentMethod,
+                paypalOrderId: '',
+                paypalTransactionId: '',
+                status: 'pending_payment',
+                createdAt: new Date().toISOString()
+              }}
+              onSuccess={() => {
+                toast.success('Zahlung erfolgreich initiiert!');
+                clearCart();
+                // navigate('/erfolg');
+              }}
+              onError={(error) => {
+                toast.error('Zahlung fehlgeschlagen');
+                console.error(error);
+              }}
+            />
           ) : (
             <button
               type="button"

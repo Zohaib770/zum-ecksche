@@ -44,4 +44,6 @@ router.post('/update-order-status', verifyToken, orderController.updateOrderStat
 router.post('/paypal-create-order', paymentController.paypalCreateOrder);
 router.post('/paypal-capture-order', paymentController.paypalCaptureOrder);
 
+router.post('/stripe-create-order', paymentController.stripeCreateOrder);
+
 module.exports = router;

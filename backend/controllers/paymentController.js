@@ -1,5 +1,7 @@
+require('dotenv').config();
 const paypal = require('@paypal/checkout-server-sdk');
 const client = require('../config/paypal');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const paypalCreateOrder = async (req, res) => {
     try {
@@ -85,7 +87,27 @@ const paypalCaptureOrder = async (req, res) => {
     }
 };
 
+
+const stripeCreateOrder = async (req, res) => {
+    try {
+        const { amount, currency, metadata } = req.body;
+
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount,
+            currency,
+            payment_method_types: ['giropay'],
+            metadata,
+        });
+
+        res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error) {
+        console.error('Stripe order creation failed:', error);
+        res.status(500).json({ error: error.message });
+    }
+}
+
 module.exports = {
     paypalCreateOrder,
-    paypalCaptureOrder
+    paypalCaptureOrder,
+    stripeCreateOrder
 };  
