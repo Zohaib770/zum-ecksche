@@ -23,7 +23,10 @@ const OrderManagement = () => {
     setIsLoading(true);
     try {
       const fetchedOrders = await Apis.fetchOrder();
-      setOrders(fetchedOrders);
+      const sortedOrders = [...fetchedOrders].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    setOrders(sortedOrders);
       filterOrders(fetchedOrders, dateFilter, customDate);
     } catch (error) {
       console.error('Fehler beim Laden der Bestellungen:', error);
@@ -212,6 +215,7 @@ const OrderManagement = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <h5 className="font-medium text-gray-700">Kundendaten</h5>
+                        <p>{order.personalDetail.fullName}</p>
                         <p>{order.personalDetail.phone}</p>
                         <p>{order.personalDetail.email}</p>
                         {order.deliveryAddress && (
@@ -249,14 +253,6 @@ const OrderManagement = () => {
                           className="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                         >
                           Als erledigt
-                        </button>
-                      )}
-                      {order.status !== 'cancelled' && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); updateOrderStatus(order._id!, 'cancelled'); }}
-                          className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                        >
-                          Stornieren
                         </button>
                       )}
                       <button
