@@ -18,6 +18,8 @@ export default function FoodItem() {
   const [availableExtras, setAvailableExtras] = useState<Extra[]>([]);
 
   const [totalPrice, setTotalPrice] = useState<number>(food?.price || 0);
+  const [selectedSize, setSelectedSize] = useState<OptionValue | null>(null);
+  const [selectedExtraBasePrice, setSelectedExtraBasePrice] = useState<number>(0);
   const [cartItem, setCartItem] = useState<CartItem>({
     name: food?.name ?? '',
     quantity: 1,
@@ -31,19 +33,35 @@ export default function FoodItem() {
   }
 
   const sizeOptions = food.options?.find(opt => opt.name === 'size')?.values || [];
-  // const extraOptions = food.options?.find(opt => opt.name === 'extras')?.values || [];
 
+  useEffect(() => {
+    if (sizeOptions.length > 0) {
+      const initialSelectedSize = sizeOptions[0];
+      setSelectedSize(initialSelectedSize);
+      const extrasPrice = getExtrasBasePrice(categories, initialSelectedSize);
+      setSelectedExtraBasePrice(extrasPrice);
 
-  // for fleischgericht/ pizza
-  //selected size for pizza
-  const initialSelectedSize = sizeOptions[0];
-  const [selectedSize, setSelectedSize] = useState<OptionValue>(initialSelectedSize);
-  //extra ingredient price upon size selected
-  const [selectedExtraBasePrice, setSelectedExtraBasePrice] = useState<number>(
-    getExtrasBasePrice(categories, initialSelectedSize)
-  );
+      // Füge die initiale Größe zu cartItem.options hinzu
+      setCartItem(prev => ({
+        ...prev,
+        price: initialSelectedSize.price!,
+        options: [
+          ...(prev.options || []).filter(o => o.name !== 'size'),
+          {
+            name: 'size',
+            values: [{
+              value: initialSelectedSize.value,
+              price: initialSelectedSize.price || 0
+            }]
+          }
+        ]
+      }));
+    }
+  }, [food, categories]);
 
-  function getExtrasBasePrice(categories: Category[], selectedSize: OptionValue): number {
+  function getExtrasBasePrice(categories: Category[], selectedSize: OptionValue | null): number {
+    if (!selectedSize) return 0;
+
     const ofenfrischePizzaCategory = categories.find(
       (category) => category.name === "Ofenfrische Pizza"
     );
@@ -61,37 +79,40 @@ export default function FoodItem() {
     return matchedValue?.price || 0;
   }
 
-
   const handleSizeChange = (value: OptionValue) => {
 
     const extrasPrice = getExtrasBasePrice(categories, value);
     setSelectedExtraBasePrice(extrasPrice);
 
     setCartItem(prev => {
+      // Behalte alle Optionen außer 'size' und 'extra'
+      const otherOptions = prev.options?.filter(o => o.name !== 'extra' && o.name !== 'size') || [];
+
+      // Behandle Extras separat
       const existingExtras = prev.options?.find(o => o.name === 'extra')?.values || [];
       const updatedExtras = existingExtras.map(extra => ({
         ...extra,
         price: extrasPrice || extra.price
       }));
 
-      const otherOptions = prev.options?.filter(o => o.name !== 'extra' && o.name !== 'size') || [];
-
       return {
         ...prev,
         price: value.price!,
         options: [
           ...otherOptions,
-          ...(updatedExtras.length > 0 ? [{
-            name: 'extra',
-            values: updatedExtras
-          }] : []),
+          // Füge die neue Größe hinzu
           {
             name: 'size',
             values: [{
               value: value.value,
               price: value.price || 0
             }]
-          }
+          },
+          // Füge Extras nur hinzu, wenn welche vorhanden sind
+          ...(updatedExtras.length > 0 ? [{
+            name: 'extra',
+            values: updatedExtras
+          }] : [])
         ]
       };
     });
@@ -140,13 +161,12 @@ export default function FoodItem() {
   };
 
   const calculateCartItemPrice = (): number => {
-    const basePrice = Number(selectedSize?.price || food.price || 0);
+    const basePrice = selectedSize?.price ?? food.price ?? 0;
     const extrasPrice = cartItem.options
       ?.filter(opt => opt.name === 'extra')
       .flatMap(opt => opt.values || [])
       .reduce((sum, val) => sum + Number(val.price || 0), 0) || 0;
-    const total = (Number(basePrice) + Number(extrasPrice));
-    return isNaN(total) ? 0 : total;
+    return Number(basePrice) + Number(extrasPrice);
   };
 
   const handleAddToCart = () => {
@@ -159,16 +179,7 @@ export default function FoodItem() {
       ...cartItem,
       name: food.name,
       price: calculateCartItemPrice(),
-      options: [
-        ...(selectedSize ? [{
-          name: 'size',
-          values: [{
-            value: selectedSize.value,
-            price: selectedSize.price || 0
-          }]
-        }] : []),
-        ...(cartItem.options || [])
-      ]
+      options: [...(cartItem.options || [])]
     };
 
     addToCart(completeCartItem);
