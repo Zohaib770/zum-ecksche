@@ -3,37 +3,17 @@ import { Category, Food } from '../../types/Interfaces';
 import Apis from '../../api/Apis';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useFoodContext } from "../../context/FoodContext";
+import { convertPriceFromDotToComma } from '../../utils/helpFunctions';
 
 const MenuPreview: React.FC = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [foodsByCategory, setFoodsByCategory] = useState<Record<string, Food[]>>({});
+
+  const {
+    categories,
+    foodsByCategory,
+  } = useFoodContext();
+
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadMenuData = async () => {
-      try {
-        setIsLoading(true);
-        const fetchedCategories = await Apis.fetchCategories();
-        setCategories(fetchedCategories);
-
-        const foodsGrouped: Record<string, Food[]> = {};
-        for (const cat of fetchedCategories) {
-          const categoryId = String(cat._id ?? '');
-          foodsGrouped[categoryId] = await Apis.fetchFoodsByCategory(categoryId);
-          setExpandedCategories(prev => ({ ...prev, [categoryId]: true }));
-        }
-        setFoodsByCategory(foodsGrouped);
-      } catch (error) {
-        console.error('Fehler beim Laden der Menü-Daten:', error);
-        toast.error('Fehler beim Laden der Menü-Daten');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadMenuData();
-  }, []);
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev => ({
@@ -42,13 +22,6 @@ const MenuPreview: React.FC = () => {
     }));
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white p-6 rounded-lg">
@@ -83,7 +56,7 @@ const MenuPreview: React.FC = () => {
                         {option.values?.map((val, j) => (
                           <span key={j} className="ml-2">
                             {val.value}
-                            {val.price && ` (${val.price})`}
+                            {val.price && ` (${convertPriceFromDotToComma(val.price)}) €`}
                             {j < (option.values?.length || 0) - 1 ? ',' : ''}
                           </span>
                         ))}
@@ -124,7 +97,7 @@ const FoodItem: React.FC<{ food: Food; index: string }> = ({ food, index }) => (
     <div className="flex justify-between">
       <div>
         <h4 className="font-medium">
-          {index}. {food.name} <span className="font-medium">{food.price}€</span></h4>
+          {index}. {food.name} <span className="font-medium">{convertPriceFromDotToComma(food.price)}€</span></h4>
         {food.description && <p className="text-sm text-gray-600">{food.description}</p>}
       </div>
     </div>
@@ -134,7 +107,7 @@ const FoodItem: React.FC<{ food: Food; index: string }> = ({ food, index }) => (
         {option.values?.map((val, j) => (
           <span key={j} className="mr-2">
             {val.value}
-            {val.price && ` (${val.price}€)`}
+            {val.price && ` (${convertPriceFromDotToComma(val.price)} €)`}
             {j < (option.values?.length || 0) - 1 ? ',' : ''}
           </span>
         ))}
