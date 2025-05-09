@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
-import { Food, CartItem, Option, OptionValue, Extra } from '../types/Interfaces';
+import { Category, Food, CartItem, Option, OptionValue, Extra } from '../types/Interfaces';
 import Apis from "../api/Apis";
 import { useFoodContext } from "../context/FoodContext";
 import { convertPriceFromDotToComma } from "../utils/helpFunctions";
@@ -26,47 +26,80 @@ export default function FoodItem() {
     comment: ''
   });
 
-    if (!food) {
+  if (!food) {
     return <div className="text-center p-8">Keine Speise ausgewählt.</div>;
   }
 
   const sizeOptions = food.options?.find(opt => opt.name === 'size')?.values || [];
-  const extraOptions = food.options?.find(opt => opt.name === 'extras')?.values || [];
+  // const extraOptions = food.options?.find(opt => opt.name === 'extras')?.values || [];
 
-  
+
   // for fleischgericht/ pizza
   //selected size for pizza
-  const [selectedSize, setSelectedSize] = useState<OptionValue>(() => sizeOptions[0]);
+  const initialSelectedSize = sizeOptions[0];
+  const [selectedSize, setSelectedSize] = useState<OptionValue>(initialSelectedSize);
   //extra ingredient price upon size selected
-  const [selectedExtraBasePrice, setSelectedExtraBasePrice] = useState<number>(0);
+  const [selectedExtraBasePrice, setSelectedExtraBasePrice] = useState<number>(
+    getExtrasBasePrice(categories, initialSelectedSize)
+  );
 
-
-  const handleSizeChange = (value: OptionValue) => {
-    setSelectedSize(value);
-
+  function getExtrasBasePrice(categories: Category[], selectedSize: OptionValue): number {
     const ofenfrischePizzaCategory = categories.find(
       (category) => category.name === "Ofenfrische Pizza"
     );
-    if (!ofenfrischePizzaCategory?.options) return;
+    if (!ofenfrischePizzaCategory?.options) return 0;
+
     const extrasOption = ofenfrischePizzaCategory.options.find(option =>
       option.name.toLowerCase().includes("extras")
     );
+    if (!extrasOption?.values) return 0;
 
-    const matchedValue = extrasOption?.values?.find(val =>
-      value.value.trim().toLowerCase().includes(val.value.trim().toLowerCase())
+    const matchedValue = extrasOption.values.find(val =>
+      selectedSize.value.trim().toLowerCase().includes(val.value.trim().toLowerCase())
     );
-    const matchedPrice = matchedValue?.price || 0;
-    setSelectedExtraBasePrice(matchedPrice);
 
-    setCartItem(prev => ({
-      ...prev,
-      price: value.price!,
-      options: prev.options?.filter(opt => opt.name !== 'size') || []
-    }));
+    return matchedValue?.price || 0;
+  }
+
+
+  const handleSizeChange = (value: OptionValue) => {
+
+    const extrasPrice = getExtrasBasePrice(categories, value);
+    setSelectedExtraBasePrice(extrasPrice);
+
+    setCartItem(prev => {
+      const existingExtras = prev.options?.find(o => o.name === 'extra')?.values || [];
+      const updatedExtras = existingExtras.map(extra => ({
+        ...extra,
+        price: extrasPrice || extra.price
+      }));
+
+      const otherOptions = prev.options?.filter(o => o.name !== 'extra' && o.name !== 'size') || [];
+
+      return {
+        ...prev,
+        price: value.price!,
+        options: [
+          ...otherOptions,
+          ...(updatedExtras.length > 0 ? [{
+            name: 'extra',
+            values: updatedExtras
+          }] : []),
+          {
+            name: 'size',
+            values: [{
+              value: value.value,
+              price: value.price || 0
+            }]
+          }
+        ]
+      };
+    });
+
+    setSelectedSize(value);
   };
 
   const handleExtraChange = (extraName: string, extraPrice: number, isChecked: boolean) => {
-
     setCartItem(prev => {
       const existingExtras = prev.options?.find(o => o.name === 'extra')?.values || [];
       let newExtras: OptionValue[];
@@ -93,7 +126,6 @@ export default function FoodItem() {
         ]
       };
     });
-
   };
 
   const handleQuantityChange = (change: number) => {
@@ -150,7 +182,6 @@ export default function FoodItem() {
         const extrasByCategory = availableExtra.filter((extra: Extra) =>
           extra.category.toLowerCase() === food.category.toLowerCase()
         );
-        console.log("extrasByCategory===  ", extrasByCategory);
         setAvailableExtras(extrasByCategory);
       } catch (error) {
         console.error("Fehler beim Laden der Extras:", error);
@@ -172,7 +203,8 @@ export default function FoodItem() {
     };
 
     setTotalPrice(calculateTotalPrice());
-  }, [selectedSize, cartItem.options, cartItem.quantity, food.price]);
+  }, [selectedSize, selectedExtraBasePrice, cartItem.options, cartItem.quantity, food.price]);
+
   return (
     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-auto mt-10 shadow-lg">
       <h2 className="text-2xl font-bold mb-2">
