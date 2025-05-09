@@ -71,7 +71,7 @@ const CheckoutForm: React.FC = () => {
     e.preventDefault();
 
     // Validation
-    if (!personalDetail.fullName || !personalDetail.phone) {
+    if (!personalDetail.fullName || !personalDetail.phone || !personalDetail.email) {
       toast.error('Bitte füllen Sie alle erforderlichen Felder aus.');
       return;
     }
