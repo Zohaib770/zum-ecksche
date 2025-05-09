@@ -2,7 +2,7 @@ import React from 'react';
 import { useCart } from '../context/CartContext';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
-import { convertPriceFromCommaToDot } from '../utils/helpFunctions';
+import { convertPriceFromCommaToDot, convertPriceFromDotToComma } from '../utils/helpFunctions';
 import { toast } from 'react-toastify';
 
 const Cart: React.FC = () => {
@@ -72,7 +72,7 @@ const Cart: React.FC = () => {
               )}
 
               <p className="mt-2 font-medium">
-                Preis: {item.quantity * item.price}€
+                Preis: {convertPriceFromDotToComma(item.quantity * item.price)}€
               </p>
             </div>
           ))}
