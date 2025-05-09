@@ -26,15 +26,20 @@ export default function FoodItem() {
     comment: ''
   });
 
-  const [selectedSize, setSelectedSize] = useState<OptionValue>();
-  const [selectedExtraBasePrice, setSelectedExtraBasePrice] = useState<number>(0);
-
-  if (!food) {
+    if (!food) {
     return <div className="text-center p-8">Keine Speise ausgewählt.</div>;
   }
 
   const sizeOptions = food.options?.find(opt => opt.name === 'size')?.values || [];
   const extraOptions = food.options?.find(opt => opt.name === 'extras')?.values || [];
+
+  
+  // for fleischgericht/ pizza
+  //selected size for pizza
+  const [selectedSize, setSelectedSize] = useState<OptionValue>(() => sizeOptions[0]);
+  //extra ingredient price upon size selected
+  const [selectedExtraBasePrice, setSelectedExtraBasePrice] = useState<number>(0);
+
 
   const handleSizeChange = (value: OptionValue) => {
     setSelectedSize(value);
@@ -60,7 +65,8 @@ export default function FoodItem() {
     }));
   };
 
-  const handleExtraChange = (extraName: string, isChecked: boolean) => {
+  const handleExtraChange = (extraName: string, extraPrice: number, isChecked: boolean) => {
+
     setCartItem(prev => {
       const existingExtras = prev.options?.find(o => o.name === 'extra')?.values || [];
       let newExtras: OptionValue[];
@@ -68,7 +74,7 @@ export default function FoodItem() {
       if (isChecked) {
         newExtras = [...existingExtras, {
           value: extraName,
-          price: selectedExtraBasePrice
+          price: selectedExtraBasePrice || extraPrice
         }];
       } else {
         newExtras = existingExtras.filter(e => e.value !== extraName);
@@ -87,6 +93,7 @@ export default function FoodItem() {
         ]
       };
     });
+
   };
 
   const handleQuantityChange = (change: number) => {
@@ -139,18 +146,19 @@ export default function FoodItem() {
   useEffect(() => {
     const fetchExtras = async () => {
       try {
-        const result = await Apis.fetchExtra();
-        const pizzaExtras = result.filter((extra: any) => extra.category === 'Ofenfrische Pizza');
-        setAvailableExtras(pizzaExtras);
+        const availableExtra = await Apis.fetchExtra();
+        const extrasByCategory = availableExtra.filter((extra: Extra) =>
+          extra.category.toLowerCase() === food.category.toLowerCase()
+        );
+        console.log("extrasByCategory===  ", extrasByCategory);
+        setAvailableExtras(extrasByCategory);
       } catch (error) {
         console.error("Fehler beim Laden der Extras:", error);
       }
     };
 
-    if (food.category === 'Ofenfrische Pizza') {
-      fetchExtras();
-    }
-  }, [food.category]);
+    fetchExtras();
+  }, [food.category, sizeOptions, selectedSize]);
 
   useEffect(() => {
     const calculateTotalPrice = (): number => {
@@ -209,9 +217,8 @@ export default function FoodItem() {
           </div>
         </div>
       )}
-
       {/* Extras (only shown after size is selected) */}
-      {selectedSize && availableExtras.length > 0 && (
+      {availableExtras.length > 0 && (
         <div className="mb-4">
           <h3 className="text-sm font-medium text-gray-700 mb-2">Extras</h3>
           <div className="grid grid-cols-2 gap-2">
@@ -226,12 +233,14 @@ export default function FoodItem() {
                           opt.values?.some(val => val.value === item.name)
                       )}
                       onChange={(e) => handleExtraChange(
-                        item.name, e.target.checked)}
+                        item.name,
+                        item.price,
+                        e.target.checked)}
                       className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded"
                     />
                     <span className="text-sm text-gray-700">
                       {item.name}
-                      {` (+${convertPriceFromDotToComma(selectedExtraBasePrice)}€)`}
+                      {` (+${convertPriceFromDotToComma(selectedExtraBasePrice || item.price)}€)`}
                     </span>
                   </label>
                 ))
@@ -244,12 +253,14 @@ export default function FoodItem() {
                         opt.values?.some(val => val.value === extra.value.name)
                     )}
                     onChange={(e) => handleExtraChange(
-                      extra.value.name, e.target.checked)}
+                      extra.value.name,
+                      extra.value.price,
+                      e.target.checked)}
                     className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded"
                   />
                   <span className="text-sm text-gray-700">
                     {extra.value.name}
-                    {extra.value.price > 0 && ` (+${extra.value.price}€)`}
+                    {extra.value.price > 0 && ` (+${convertPriceFromDotToComma(extra.value.price)}€)`}
                   </span>
                 </label>
               )
