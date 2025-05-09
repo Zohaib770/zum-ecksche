@@ -111,6 +111,7 @@ const FoodList = () => {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+    toggleCategory(categoryId);
   };
 
   const addFoodItem = (food: Food) => {
