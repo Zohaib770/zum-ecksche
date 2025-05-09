@@ -2,7 +2,6 @@ import React, { useRef } from 'react';
 import FoodList from '../components/FoodList';
 import HeroSection from './HeroSection';
 import Footer from './Footer';
-import CookieBanner from '../components/CookieBanner';
 
 const HomePage: React.FC = () => {
     const foodListRef = useRef<HTMLDivElement>(null);
