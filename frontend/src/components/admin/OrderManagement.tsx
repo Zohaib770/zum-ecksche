@@ -186,25 +186,17 @@ const OrderManagement = () => {
       {/* Revenue summary */}
       <div className="bg-blue-50 p-3 rounded-lg mb-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex gap-2">
+            <div className="text-center">
+              <p className="text-sm text-gray-500">Gesamte Bestellungen</p>
+              <p className="font-medium">{filteredOrders.length}</p>
+            </div>
+          </div>
           <div>
             <h4 className="font-medium text-gray-700">Gesamtumsatz</h4>
             <p className="text-2xl font-bold text-blue-600">
               {convertPriceFromDotToComma(totalRevenue)} €
             </p>
-          </div>
-          <div className="flex gap-2">
-            <div className="text-center">
-              <p className="text-sm text-gray-500">Bestellungen</p>
-              <p className="font-medium">{filteredOrders.length}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-gray-500">Durchschnitt</p>
-              <p className="font-medium">
-                {filteredOrders.length > 0
-                  ? convertPriceFromDotToComma(totalRevenue / filteredOrders.length)
-                  : '0'} €
-              </p>
-            </div>
           </div>
         </div>
       </div>
@@ -344,14 +336,6 @@ const OrderManagement = () => {
                           className="text-sm bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
                         >
                           Als erledigt markieren
-                        </button>
-                      )}
-                      {order.status !== 'cancelled' && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); updateOrderStatus(order._id!, 'cancelled'); }}
-                          className="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
-                        >
-                          Stornieren
                         </button>
                       )}
                       <button
