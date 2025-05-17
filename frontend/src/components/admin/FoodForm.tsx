@@ -233,7 +233,6 @@ const FoodForm: React.FC = () => {
                 type="number"
                 step="0.5"
                 min="1"
-                value={food.price}
                 onChange={(e) => setFood({ ...food, price: Number(e.target.value) })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 required
