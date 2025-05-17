@@ -258,6 +258,7 @@ const CategoryForm: React.FC = () => {
                 <input
                   type="number"
                   step="0.5"
+                  min="1"
                   placeholder="Preis"
                   value={currentOption.price}
                   onChange={(e) => setCurrentOption({ ...currentOption, price: e.target.value })}
