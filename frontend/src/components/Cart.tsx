@@ -20,10 +20,10 @@ const Cart: React.FC = () => {
 
   const handleGoToCheckout = () => {
     const total = parseFloat(calculateTotal());
-    if (total < 12) {
-      toast.error('Mindestbestellwert ist 12 €');
-      return;
-    }
+    // if (total < 12) {
+    //   toast.error('Mindestbestellwert ist 12 €');
+    //   return;
+    // }
     navigate('/checkout');
   };
 

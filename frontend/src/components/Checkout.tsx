@@ -80,10 +80,10 @@ const CheckoutForm: React.FC = () => {
       const selectedZone = deliveryZones.find(zone => zone.name === deliveryAddress.city);
       const minAmount = selectedZone?.min_order_price ?? 0;
 
-      if (calculateTotal() < minAmount) {
-        toast.error(`Mindestbestellwert für ${deliveryAddress.city} ist ${minAmount} €.`);
-        return;
-      }
+      // if (calculateTotal() < minAmount) {
+      //   toast.error(`Mindestbestellwert für ${deliveryAddress.city} ist ${minAmount} €.`);
+      //   return;
+      // }
 
       if (!deliveryAddress.street || !deliveryAddress.postalCode || !deliveryAddress.city) {
         toast.error('Bitte füllen Sie die Lieferadresse vollständig aus.');
