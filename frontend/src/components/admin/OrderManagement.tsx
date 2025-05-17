@@ -7,6 +7,7 @@ import socketIOClient from 'socket.io-client';
 import OrderPrintView from './OrderPrintView';
 import { format, isToday, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { convertPriceFromDotToComma } from '../../utils/helpFunctions';
 
 const OrderManagement = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -23,10 +24,10 @@ const OrderManagement = () => {
     setIsLoading(true);
     try {
       const fetchedOrders = await Apis.fetchOrder();
-      const sortedOrders = [...fetchedOrders].sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-    setOrders(sortedOrders);
+      const sortedOrders = [...fetchedOrders].sort((a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setOrders(sortedOrders);
       filterOrders(fetchedOrders, dateFilter, customDate);
     } catch (error) {
       console.error('Fehler beim Laden der Bestellungen:', error);
@@ -197,7 +198,7 @@ const OrderManagement = () => {
                   </div>
                   <div className="flex flex-col items-end">
                     <p className="text-sm font-medium whitespace-nowrap">
-                      {calculateTotal(order)} €
+                      {convertPriceFromDotToComma(calculateTotal(order))} €
                     </p>
                     <span className={`px-2 py-0.5 rounded text-xs mt-1 ${order.status === 'completed'
                       ? 'bg-green-100 text-green-800'
@@ -220,7 +221,12 @@ const OrderManagement = () => {
                         <p>{order.personalDetail.email}</p>
                         {order.deliveryAddress && (
                           <p className="mt-1">
-                            {order.deliveryAddress.street}, {order.deliveryAddress.postalCode} {order.deliveryAddress.city}
+                            <p>Strasse: {order.deliveryAddress.street}</p>
+                            <p>Stadt: {order.deliveryAddress.postalCode} {order.deliveryAddress.city}</p>
+                            {order.deliveryAddress?.floor &&
+                              <p> Etage: {order.deliveryAddress?.floor}</p>}
+                              {order.deliveryAddress?.comment &&
+                            <p>Anmerkung: {order.deliveryAddress?.comment}</p>}
                           </p>
                         )}
                       </div>
@@ -229,7 +235,7 @@ const OrderManagement = () => {
                         <ul className="list-disc list-inside">
                           {order.cartItem.map((item, i) => (
                             <li key={i} className="mb-2">
-                                {item.quantity} x {item.name} - {item.price * item.quantity}€
+                              {item.quantity} x {item.name} - {convertPriceFromDotToComma(item.price * item.quantity)}€
                               {item.options?.map((opt) => (
                                 <div key={opt.name} className="ml-4 text-sm text-gray-600">
                                   • {opt.name}: {opt.values?.map(v => v.value).join(', ')}
