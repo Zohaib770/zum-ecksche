@@ -20,6 +20,11 @@ const OrderManagement = () => {
   const [dateFilter, setDateFilter] = useState<'today' | 'all' | 'custom'>('today');
   const [customDate, setCustomDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
 
+  // Calculate total revenue for filtered orders
+  const totalRevenue = filteredOrders.reduce((sum, order) => {
+    return sum + order.cartItem.reduce((orderSum, item) => orderSum + (item.price * item.quantity), 0);
+  }, 0);
+
   const fetchOrders = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -38,20 +43,17 @@ const OrderManagement = () => {
   }, [dateFilter, customDate]);
 
   const filterOrders = (ordersToFilter: Order[], filterType: string, selectedDate: string) => {
+    let filtered: Order[];
     if (filterType === 'today') {
-      const todayOrders = ordersToFilter.filter(order =>
-        isToday(parseISO(order.createdAt))
-      );
-      setFilteredOrders(todayOrders);
+      filtered = ordersToFilter.filter(order => isToday(parseISO(order.createdAt)));
     } else if (filterType === 'all') {
-      setFilteredOrders(ordersToFilter);
+      filtered = ordersToFilter;
     } else {
-      // Custom date filter
-      const filtered = ordersToFilter.filter(order =>
+      filtered = ordersToFilter.filter(order =>
         format(parseISO(order.createdAt), 'yyyy-MM-dd') === selectedDate
       );
-      setFilteredOrders(filtered);
     }
+    setFilteredOrders(filtered);
   };
 
   const allowAudioPlayback = (ref: React.RefObject<HTMLAudioElement>) => {
@@ -64,7 +66,6 @@ const OrderManagement = () => {
         .catch(console.warn);
       window.removeEventListener("click", attemptPlay);
     };
-
     window.addEventListener("click", attemptPlay);
   };
 
@@ -131,20 +132,36 @@ const OrderManagement = () => {
     return format(parseISO(dateString), 'PPpp', { locale: de });
   };
 
+  const getFilterDescription = () => {
+    switch (dateFilter) {
+      case 'today':
+        return 'Heutige Bestellungen';
+      case 'all':
+        return 'Alle Bestellungen';
+      case 'custom':
+        return `Bestellungen vom ${format(parseISO(customDate), 'PPP', { locale: de })}`;
+      default:
+        return 'Bestellungen';
+    }
+  };
+
   if (isLoading) return <div className="text-center p-8">Lade Bestellungen...</div>;
 
   return (
     <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border h-full">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-        <h3 className="text-lg font-semibold">Bestellverwaltung</h3>
+        <div>
+          <h3 className="text-lg font-semibold">Bestellverwaltung</h3>
+          <p className="text-sm text-gray-500">{getFilterDescription()}</p>
+        </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex items-center gap-2">
             <label className="text-sm text-gray-600">Filter:</label>
             <select
               value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value as 'today' | 'all')}
-              className="border rounded p-1 text-sm"
+              onChange={(e) => setDateFilter(e.target.value as 'today' | 'all' | 'custom')}
+              className="border rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="today">Heute</option>
               <option value="all">Alle</option>
@@ -159,10 +176,36 @@ const OrderManagement = () => {
                 type="date"
                 value={customDate}
                 onChange={(e) => setCustomDate(e.target.value)}
-                className="border rounded p-1 text-sm"
+                className="border rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Revenue summary */}
+      <div className="bg-blue-50 p-3 rounded-lg mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h4 className="font-medium text-gray-700">Gesamtumsatz</h4>
+            <p className="text-2xl font-bold text-blue-600">
+              {convertPriceFromDotToComma(totalRevenue)} €
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <div className="text-center">
+              <p className="text-sm text-gray-500">Bestellungen</p>
+              <p className="font-medium">{filteredOrders.length}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-gray-500">Durchschnitt</p>
+              <p className="font-medium">
+                {filteredOrders.length > 0
+                  ? convertPriceFromDotToComma(totalRevenue / filteredOrders.length)
+                  : '0'} €
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -181,16 +224,46 @@ const OrderManagement = () => {
             return (
               <div
                 key={order._id}
-                className="border rounded-lg p-3 md:p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => toggleDetails(order._id!)}
               >
-                <div className="flex flex-col sm:flex-row justify-between gap-2">
+                <div className="flex flex-col sm:flex-row justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium truncate">
-                      {order.personalDetail.fullName}
-                    </h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium truncate">
+                        {order.personalDetail.fullName}
+                      </h4>
+                      <div className="flex flex-wrap items-center gap-2 mt-1">
+                        {/* Payment Method (Bar / Online) */}
+                        {order.paymentMethod && (
+                          <span className={`text-xs px-2 py-0.5 rounded 
+                            ${order.paymentMethod === 'cash'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : order.paymentMethod === 'online'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'}`}>
+                            {order.paymentMethod === 'cash' ? 'Barzahlung' :
+                              order.paymentMethod === 'online' ? 'Online-Zahlung' :
+                                order.paymentMethod}
+                          </span>
+                        )}
+                        {/* Order Type (Lieferung / Abholung) */}
+                        {order.orderType && (
+                          <span className={`text-xs px-2 py-0.5 rounded 
+                              ${order.orderType === 'delivery'
+                              ? 'bg-red-100 text-red-800'
+                              : order.orderType === 'pickup'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'}`}>
+                            {order.orderType === 'delivery' ? 'Lieferung' :
+                              order.orderType === 'pickup' ? 'Abholung' :
+                                order.orderType}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                     <p className="text-sm text-gray-600 truncate">
-                      {order.cartItem[0]?.name}...
+                      {order.cartItem.length} Artikel • {order.cartItem[0]?.name}...
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
                       {formatOrderDate(order.createdAt)}
@@ -215,34 +288,46 @@ const OrderManagement = () => {
                   <div className="mt-3 border-t pt-3 text-sm">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <h5 className="font-medium text-gray-700">Kundendaten</h5>
-                        <p>{order.personalDetail.fullName}</p>
-                        <p>{order.personalDetail.phone}</p>
-                        <p>{order.personalDetail.email}</p>
-                        {order.deliveryAddress && (
-                          <p className="mt-1">
-                            <p>Strasse: {order.deliveryAddress.street}</p>
-                            <p>Stadt: {order.deliveryAddress.postalCode} {order.deliveryAddress.city}</p>
-                            {order.deliveryAddress?.floor &&
-                              <p> Etage: {order.deliveryAddress?.floor}</p>}
-                              {order.deliveryAddress?.comment &&
-                            <p>Anmerkung: {order.deliveryAddress?.comment}</p>}
-                          </p>
-                        )}
+                        <h5 className="font-medium text-gray-700 mb-2">Kundendaten</h5>
+                        <div className="space-y-1">
+                          <p>{order.personalDetail.fullName}</p>
+                          <p>{order.personalDetail.phone}</p>
+                          <p>{order.personalDetail.email}</p>
+                          {order.deliveryAddress && (
+                            <div className="mt-2 space-y-1">
+                              <p className="font-medium">Lieferadresse:</p>
+                              <p>{order.deliveryAddress.street}</p>
+                              <p>{order.deliveryAddress.postalCode} {order.deliveryAddress.city}</p>
+                              {order.deliveryAddress?.floor && (
+                                <p>Etage: {order.deliveryAddress.floor}</p>
+                              )}
+                              {order.deliveryAddress?.comment && (
+                                <p className="text-gray-600">Anmerkung: {order.deliveryAddress.comment}</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div>
-                        <h5 className="font-medium text-gray-700">Bestelldetails</h5>
-                        <ul className="list-disc list-inside">
+                        <h5 className="font-medium text-gray-700 mb-2">Bestelldetails</h5>
+                        <ul className="space-y-3">
                           {order.cartItem.map((item, i) => (
-                            <li key={i} className="mb-2">
-                              {item.quantity} x {item.name} - {convertPriceFromDotToComma(item.price * item.quantity)}€
+                            <li key={i} className="border-b pb-2 last:border-0">
+                              <div className="flex justify-between">
+                                <span>
+                                  {item.quantity} x {item.name}
+                                </span>
+                                <span className="font-medium">
+                                  {convertPriceFromDotToComma(item.price * item.quantity)}€
+                                </span>
+                              </div>
                               {item.options?.map((opt) => (
-                                <div key={opt.name} className="ml-4 text-sm text-gray-600">
+                                <div key={opt.name} className="ml-2 text-sm text-gray-600">
                                   • {opt.name}: {opt.values?.map(v => v.value).join(', ')}
                                 </div>
                               ))}
                               {item.comment && (
-                                <div className="ml-4 text-sm text-gray-500 italic">
+                                <div className="ml-2 text-sm text-gray-500 italic">
                                   • Hinweis: {item.comment}
                                 </div>
                               )}
@@ -252,18 +337,26 @@ const OrderManagement = () => {
                       </div>
                     </div>
 
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-4 flex flex-wrap gap-2">
                       {order.status !== 'completed' && (
                         <button
                           onClick={(e) => { e.stopPropagation(); updateOrderStatus(order._id!, 'completed'); }}
-                          className="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                          className="text-sm bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
                         >
-                          Als erledigt
+                          Als erledigt markieren
+                        </button>
+                      )}
+                      {order.status !== 'cancelled' && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); updateOrderStatus(order._id!, 'cancelled'); }}
+                          className="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+                        >
+                          Stornieren
                         </button>
                       )}
                       <button
                         onClick={(e) => { e.stopPropagation(); handlePrint(order); }}
-                        className="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                        className="text-sm bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
                       >
                         Drucken
                       </button>
