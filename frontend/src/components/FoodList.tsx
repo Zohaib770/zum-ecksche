@@ -14,7 +14,6 @@ const FoodList = () => {
 
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [scrollPosition, setScrollPosition] = useState(0);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const categoriesRef = useRef<HTMLDivElement>(null);
@@ -71,30 +70,15 @@ const FoodList = () => {
   };
 
   const handleScroll = (direction: 'left' | 'right') => {
-    if (categoriesRef.current && categories.length > 0) {
-      const currentIndex = categories.findIndex(cat => String(cat._id) === selectedCategoryId);
-      let newIndex = currentIndex;
+    const container = categoriesRef.current;
+    if (container && categories.length > 0) {
+      const scrollAmount = container.offsetWidth / 2;
 
-      if (direction === 'left' && currentIndex > 0) {
-        newIndex = currentIndex - 1;
-      } else if (direction === 'right' && currentIndex < categories.length - 1) {
-        newIndex = currentIndex + 1;
-      }
+      const newScroll = direction === 'left'
+        ? container.scrollLeft - scrollAmount
+        : container.scrollLeft + scrollAmount;
 
-      if (newIndex !== currentIndex) {
-        const newCategoryId = String(categories[newIndex]._id);
-        setSelectedCategoryId(newCategoryId);
-        scrollToCategory(newCategoryId);
-
-        // Update scroll position
-        const scrollAmount = categoriesRef.current.offsetWidth / 2;
-        const newScroll = direction === 'left'
-          ? scrollPosition - scrollAmount
-          : scrollPosition + scrollAmount;
-
-        categoriesRef.current.scrollTo({ left: newScroll, behavior: 'smooth' });
-        setScrollPosition(newScroll);
-      }
+      container.scrollTo({ left: newScroll, behavior: 'smooth' });
     }
   };
 
@@ -234,61 +218,61 @@ const FoodList = () => {
                     </div>
                   )}
 
+                </div>
+                <svg
+                  className={`w-5 h-5 text-gray-500 transform transition-transform ${expandedCategories[catId] ? 'rotate-180' : ''
+                    }`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </div>
-              <svg
-                className={`w-5 h-5 text-gray-500 transform transition-transform ${expandedCategories[catId] ? 'rotate-180' : ''
-                  }`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
 
               {
-            expandedCategories[catId] && (
-              <div className="p-4">
-                <div className="space-y-3">
-                  {filteredFoods.map((food: Food) => (
-                    <div key={String(food._id)} className="pb-3 border-b last:border-0">
-                      <div className="flex justify-between">
-                        <div>
-                          <h4 className="font-medium">
-                            {food.name} <span className="font-medium">{convertPriceFromDotToComma(food.price)} €</span>
-                          </h4>
-                          {food.description && (
-                            <p className="text-sm text-gray-600">{food.description}</p>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => addFoodItem(food)}
-                          className="w-7 h-7 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
-                        >
-                          +
-                        </button>
-                      </div>
-                      {food.options?.map((option: Option, i) => (
-                        <div key={i} className="mt-1 text-sm">
-                          <span className="text-gray-600">{option.name}: </span>
-                          {option.values?.map((val, j) => (
-                            <span key={j} className="mr-2">
-                              {val.value} {val.price !== 0 && `(${convertPriceFromDotToComma(val.price)} €)`}
-                            </span>
+                expandedCategories[catId] && (
+                  <div className="p-4">
+                    <div className="space-y-3">
+                      {filteredFoods.map((food: Food) => (
+                        <div key={String(food._id)} className="pb-3 border-b last:border-0">
+                          <div className="flex justify-between">
+                            <div>
+                              <h4 className="font-medium">
+                                {food.name} <span className="font-medium">{convertPriceFromDotToComma(food.price)} €</span>
+                              </h4>
+                              {food.description && (
+                                <p className="text-sm text-gray-600">{food.description}</p>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => addFoodItem(food)}
+                              className="w-7 h-7 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                            >
+                              +
+                            </button>
+                          </div>
+                          {food.options?.map((option: Option, i) => (
+                            <div key={i} className="mt-1 text-sm">
+                              <span className="text-gray-600">{option.name}: </span>
+                              {option.values?.map((val, j) => (
+                                <span key={j} className="mr-2">
+                                  {val.value} {val.price !== 0 && `(${convertPriceFromDotToComma(val.price)} €)`}
+                                </span>
+                              ))}
+                            </div>
                           ))}
                         </div>
                       ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-            )
-          }
+                  </div>
+                )
+              }
             </div>
-      );
+          );
         })}
-    </div>
+      </div>
     </div >
   );
 };
