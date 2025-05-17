@@ -72,9 +72,6 @@ export default function LoginPage() {
           </div>
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         </form>
-        <p className="mt-4 text-center text-sm">
-          {t.no_account} <a href="/register" className="text-yellow-600 hover:underline">{t.register_link}</a>
-        </p>
       </div>
     </div>
   );
