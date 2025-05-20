@@ -219,68 +219,12 @@ const OrderManagement = () => {
                 className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => toggleDetails(order._id!)}
               >
-                <div className="flex flex-col sm:flex-row justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-medium truncate">
-                        {order.personalDetail.fullName}
-                      </h4>
-                      <div className="flex flex-wrap items-center gap-2 mt-1">
-                        {/* Payment Method (Bar / Online) */}
-                        {order.paymentMethod && (
-                          <span className={`text-xs px-2 py-0.5 rounded 
-                            ${order.paymentMethod === 'cash'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : order.paymentMethod === 'online'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-800'}`}>
-                            {order.paymentMethod === 'cash' ? 'Barzahlung' :
-                              order.paymentMethod === 'online' ? 'Online-Zahlung' :
-                                order.paymentMethod}
-                          </span>
-                        )}
-                        {/* Order Type (Lieferung / Abholung) */}
-                        {order.orderType && (
-                          <span className={`text-xs px-2 py-0.5 rounded 
-                              ${order.orderType === 'delivery'
-                              ? 'bg-red-100 text-red-800'
-                              : order.orderType === 'pickup'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-800'}`}>
-                            {order.orderType === 'delivery' ? 'Lieferung' :
-                              order.orderType === 'pickup' ? 'Abholung' :
-                                order.orderType}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600 truncate">
-                      {order.cartItem.length} Artikel • {order.cartItem[0]?.name}...
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {formatOrderDate(order.createdAt)}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <p className="text-sm font-medium whitespace-nowrap">
-                      {convertPriceFromDotToComma(calculateTotal(order))} €
-                    </p>
-                    <span className={`px-2 py-0.5 rounded text-xs mt-1 ${order.status === 'completed'
-                      ? 'bg-green-100 text-green-800'
-                      : order.status === 'cancelled'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                      {order.status}
-                    </span>
-                  </div>
-                </div>
-
+                {/* className="mt-3 border-t pb-3 text-sm" */}
                 {isExpanded && (
-                  <div className="mt-3 border-t pt-3 text-sm">
+                  <div className="mb-3 border-b pb-3 text-sm">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <h5 className="font-medium text-gray-700 mb-2">Kundendaten</h5>
+                        <h5 className="font-medium mb-2">Kundendaten</h5>
                         <div className="space-y-1">
                           <p>{order.personalDetail.fullName}</p>
                           <p>{order.personalDetail.phone}</p>
@@ -301,7 +245,7 @@ const OrderManagement = () => {
                         </div>
                       </div>
                       <div>
-                        <h5 className="font-medium text-gray-700 mb-2">Bestelldetails</h5>
+                        <h5 className="font-medium mb-2">Bestelldetails</h5>
                         <ul className="space-y-3">
                           {order.cartItem.map((item, i) => (
                             <li key={i} className="border-b pb-2 last:border-0">
@@ -347,11 +291,69 @@ const OrderManagement = () => {
                     </div>
                   </div>
                 )}
+                <div className="flex flex-col sm:flex-row justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium truncate">
+                        {order.personalDetail.fullName}
+                      </h4>
+                      <div className="flex flex-wrap items-center gap-2 mt-1">
+                        {/* Payment Method (Bar / Online) */}
+                        {order.paymentMethod && (
+                          <span className={`text-xs px-2 py-0.5 rounded 
+                            ${order.paymentMethod === 'cash'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : order.paymentMethod === 'online'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'}`}>
+                            {order.paymentMethod === 'cash' ? 'Barzahlung' :
+                              order.paymentMethod === 'online' ? 'Online-Zahlung' :
+                                order.paymentMethod}
+                          </span>
+                        )}
+                        {/* Order Type (Lieferung / Abholung) */}
+                        {order.orderType && (
+                          <span className={`text-xs px-2 py-0.5 rounded 
+                              ${order.orderType === 'delivery'
+                              ? 'bg-red-100 text-red-800'
+                              : order.orderType === 'pickup'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'}`}>
+                            {order.orderType === 'delivery' ? 'Lieferung' :
+                              order.orderType === 'pickup' ? 'Abholung' :
+                                order.orderType}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 truncate">
+                      {order.cartItem.length} Artikel • {order.cartItem[0]?.name}...
+                    </p>
+                    <p className="text-xs mt-1">
+                      {formatOrderDate(order.createdAt)}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <p className="text-sm font-medium whitespace-nowrap">
+                      {convertPriceFromDotToComma(calculateTotal(order))} €
+                    </p>
+                    <span className={`px-2 py-0.5 rounded text-xs mt-1 ${order.status === 'completed'
+                      ? 'bg-green-100 text-green-800'
+                      : order.status === 'cancelled'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                      {order.status}
+                    </span>
+                  </div>
+                </div>
+
               </div>
             );
           })}
         </div>
-      )}
+      )
+      }
       <audio ref={audioRef} src="/sounds/new-order.mp3" preload="auto" />
     </div>
   );
