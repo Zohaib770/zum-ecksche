@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import { axiosPublic, axiosPrivate } from './AxiosInstance';
 import { Category, Food, Option, Order, DeliveryZone, Extra } from '../types/Interfaces';
 
@@ -80,7 +81,7 @@ const Apis = {
   updateFood: async (id: number, food: Food) => {
     try {
       const response = await axiosPrivate.put(`/api/update-food/${id}`, food);
-    return response.data;
+      return response.data;
     } catch (error) {
       console.error('Fehler beim bearbeiten der Speise:', error);
       throw error;
@@ -199,7 +200,18 @@ const Apis = {
     }
   },
 
-
+  printOrder: async (order: Order) => {
+    try {
+      const response = await axiosPublic.post('/api/print', order);
+      if (response.data.success) {  // Check response.data
+        toast.success("Druckauftrag gesendet!");
+      } else {
+        toast.error("Druckerfehler: " + response.data.error);
+      }
+    } catch (error) {
+      toast.error("Drucker nicht erreichbar: " + error);
+    }
+  }
 };
 
 export default Apis;

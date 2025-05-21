@@ -16,7 +16,7 @@ const OrderManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
-  const [printOrder, setPrintOrder] = useState<Order | null>(null);
+  // const [printOrder, setPrintOrder] = useState<Order | null>(null);
   const [dateFilter, setDateFilter] = useState<'today' | 'all' | 'custom'>('today');
   const [customDate, setCustomDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
 
@@ -121,11 +121,8 @@ const OrderManagement = () => {
     return order.cartItem.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   };
 
-  const handlePrint = (order: Order) => {
-    setPrintOrder(order);
-    setTimeout(() => {
-      window.print();
-    }, 100);
+  const handlePrint = async (order: Order) => {
+    await Apis.printOrder(order);
   };
 
   const formatOrderDate = (dateString: string) => {
@@ -200,12 +197,6 @@ const OrderManagement = () => {
           </div>
         </div>
       </div>
-
-      {printOrder && (
-        <div className="hidden print:block">
-          <OrderPrintView ref={printRef} order={printOrder} />
-        </div>
-      )}
 
       {filteredOrders.length === 0 ? (
         <p className="text-gray-500 text-center py-8">Keine Bestellungen vorhanden</p>
@@ -283,7 +274,7 @@ const OrderManagement = () => {
                         </button>
                       )}
                       <button
-                        onClick={(e) => { e.stopPropagation(); handlePrint(order); }}
+                        onClick={(e) => { handlePrint(order); }}
                         className="text-sm bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
                       >
                         Drucken
