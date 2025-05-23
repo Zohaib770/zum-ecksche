@@ -5,7 +5,8 @@ const PrinterTypes = require("node-thermal-printer").types;
 const printOrderReceipt = async (req, res) => {
     const printer = new ThermalPrinter({
         type: PrinterTypes.EPSON,
-        interface: process.env.PRINTER_IP, // IP "tcp://192.168.1.100"
+        interface: process.env.PRINTER_IP,
+        characterSet: process.env.CHARACTERSET,
     });
 
     const order = req.body;
@@ -26,9 +27,10 @@ const printOrderReceipt = async (req, res) => {
 
     try {
         await printer.execute();
+        console.log(printer.getBuffer().toString());
         res.send({ success: true });
     } catch (error) {
-        console.error("print fail:", error); 
+        console.error("print fail:", error);
         res.status(500).send({ error: error.message });
     }
 };
