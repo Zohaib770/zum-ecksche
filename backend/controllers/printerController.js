@@ -7,6 +7,10 @@ const printOrderReceipt = async (req, res) => {
         type: PrinterTypes.EPSON,
         interface: process.env.PRINTER_IP,
         characterSet: process.env.CHARACTERSET,
+        options: {
+            console: true,
+            timeout: 5000,
+        }
     });
 
     const order = req.body;
