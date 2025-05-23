@@ -1,12 +1,16 @@
 const Order = require('../models/orderModel');
 const { getIO } = require('../config/socket');
+const { sendOrderConfirmation } = require("./emailController");
 
 const createOrder = async (req, res) => {
   try {
     const orderData = req.body;
     const newOrder = new Order(orderData);
-    await newOrder.save();
+    const saveorder = await newOrder.save();
     console.log("Bestellung erfolgreich gespeichert");
+
+    await sendOrderConfirmation(saveorder, req.body.personalDetail.email);
+
     const io = getIO(); // Rufe die initialisierte io-Instanz ab
     io.emit('newOrder', newOrder);
     res.status(201).json({ message: 'Bestellung erfolgreich gespeichert', order: newOrder });
