@@ -13,7 +13,7 @@ const CheckoutForm: React.FC = () => {
   const { items, clearCart } = useCart();
   const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'online'>('cash');
-  const [onlinePaymentMethod, setOnlinePaymentMethod] = useState<'paypal' | 'giro' | null>(null);
+  const [onlinePaymentMethod, setOnlinePaymentMethod] = useState<'paypal' | null>(null);
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const [showPayPalModal, setShowPayPalModal] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress>({
@@ -331,7 +331,7 @@ const CheckoutForm: React.FC = () => {
           <div className="mt-4 space-y-3">
             <h3 className="text-lg font-medium">Online-Zahlungsmethode wählen:</h3>
             <div className="space-y-2">
-              {['paypal', 'giro'].map((method) => (
+              {['paypal'].map((method) => (
                 <label key={method} className="flex items-center space-x-3">
                   <input
                     type="radio"
@@ -342,7 +342,6 @@ const CheckoutForm: React.FC = () => {
                   />
                   <span>
                     {method === 'paypal' && 'PayPal'}
-                    {method === 'giro' && 'Giro Business Account'}
                   </span>
                 </label>
               ))}

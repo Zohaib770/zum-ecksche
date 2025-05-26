@@ -4,7 +4,6 @@ import Apis from '../../api/Apis';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import socketIOClient from 'socket.io-client';
-import OrderPrintView from './OrderPrintView';
 import { format, isToday, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { convertPriceFromDotToComma } from '../../utils/helpFunctions';
