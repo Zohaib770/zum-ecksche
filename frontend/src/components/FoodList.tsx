@@ -246,7 +246,7 @@ const FoodList = () => {
                               )}
                             </div>
                             <div>
-                              <span className="font-medium">{convertPriceFromDotToComma(food.price)} €</span>
+                              <span className="font-medium mr-2">{convertPriceFromDotToComma(food.price)} €</span>
                               <button
                                 type="button"
                                 onClick={() => addFoodItem(food)}

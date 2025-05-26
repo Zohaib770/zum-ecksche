@@ -235,7 +235,6 @@ const CheckoutForm: React.FC = () => {
                   type="text"
                   id="postalCode"
                   name="postalCode"
-                  value={deliveryAddress.postalCode}
                   onChange={handleAddressChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
                   required
