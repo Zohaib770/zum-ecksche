@@ -3,7 +3,7 @@ const nodemailer = require("nodemailer");
 
 // Hostinger SMTP settings
 const transporter = nodemailer.createTransport({
-    host: "mail.yourdomain.com", // Replace with your domain
+    host: process.env.MAIL_HOST, // Replace with your domain
     port: 465, // SSL port
     secure: true, // true for 465, false for other ports
     auth: {
@@ -18,10 +18,9 @@ const sendOrderConfirmation = async (order, userEmail) => {
         await transporter.sendMail({
             from: process.env.SENDER_MAIL, // Sender
             to: userEmail, // Customer email
-            subject: `Bestellbestätigung  #${order._id}`, // Subject
+            subject: `Zum Ecksche Bestellbestätigung`,
             html: `
                 <h2>Vielen Dank für Ihre Bestellung!</h2>
-                <p>Bestellnummer: <strong>${order._id}</strong></p>
                 <h3>Ihre Artikel:</h3>
                 <ul>
                     ${order.cartItem.map(item => `
