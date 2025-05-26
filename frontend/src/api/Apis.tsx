@@ -200,18 +200,6 @@ const Apis = {
     }
   },
 
-  printOrder: async (order: Order) => {
-    try {
-      const response = await axiosPublic.post('/api/print', order);
-      if (response.data.success) {  // Check response.data
-        toast.success("Druckauftrag gesendet!");
-      } else {
-        toast.error("Druckerfehler: " + response.data.error);
-      }
-    } catch (error) {
-      toast.error("Drucker nicht erreichbar: " + error);
-    }
-  }
 };
 
 export default Apis;

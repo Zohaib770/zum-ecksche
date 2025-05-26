@@ -122,7 +122,7 @@ const OrderManagement = () => {
   };
 
   const handlePrint = async (order: Order) => {
-    await Apis.printOrder(order);
+    toast.info("in Bearbeitung")
   };
 
   const formatOrderDate = (dateString: string) => {
