@@ -114,7 +114,7 @@ const CheckoutForm: React.FC = () => {
         await Apis.addOrder(orderData);
         toast.success('Bestellung erfolgreich aufgegeben!');
         clearCart();
-        navigate('/erfolg');
+        navigate('/erfolg', { state: { paymentMethod: 'cash' } });
       }
     } catch (error) {
       console.error('Fehler beim Abschicken der Bestellung:', error);
@@ -387,7 +387,7 @@ const CheckoutForm: React.FC = () => {
                 onSuccess={() => {
                   toast.success('Zahlung erfolgreich!');
                   clearCart();
-                  navigate('/erfolg');
+                  navigate('/erfolg', { state: { paymentMethod: 'online' } });
                 }}
                 onError={(error) => {
                   toast.error('Zahlung fehlgeschlagen');
