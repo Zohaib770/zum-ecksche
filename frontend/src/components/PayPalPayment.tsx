@@ -21,8 +21,8 @@ const PayPalPayment: React.FC<PayPalProps> = ({ order, onSuccess, onError, onCan
 
   const createOrder = async (data: any, actions: any) => {
     try {
-      const paypalOrderId = await Apis.paypalCreateOrder(order);
-      return paypalOrderId;
+      const response  = await Apis.paypalCreateOrder(order);
+      return response.data.id;
     } catch (error) {
       toast.error('Fehler bei der PayPal-Ordererstellung');
       throw error;
@@ -40,7 +40,7 @@ const PayPalPayment: React.FC<PayPalProps> = ({ order, onSuccess, onError, onCan
         status: 'paid',
         paymentMethod: 'online',
         onlinePaymentMethod: 'paypal',
-        paypalOrderId: data.orderID,
+        paypalOrderId: captureResponse.data.details.id,
         paypalTransactionId: captureResponse.data.details.purchase_units[0]?.payments?.captures[0]?.id,
         createdAt: new Date().toISOString()
       };
@@ -49,7 +49,6 @@ const PayPalPayment: React.FC<PayPalProps> = ({ order, onSuccess, onError, onCan
       const dbResponse = await Apis.addOrder(completedOrder);
 
       if (dbResponse) {
-        toast.success('Zahlung und Bestellung erfolgreich!');
         onSuccess();
       }
     } catch (error) {
@@ -64,7 +63,7 @@ const PayPalPayment: React.FC<PayPalProps> = ({ order, onSuccess, onError, onCan
     layout: 'vertical' as const,
     shape: 'rect' as const,
     color: 'blue' as const,
-    label: 'paypal' as const, 
+    label: 'paypal' as const,
     tagline: false,
     height: 48
   };

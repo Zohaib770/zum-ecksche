@@ -177,7 +177,7 @@ const Apis = {
         })),
         customer: orderData.personalDetail
       });
-      return response.data.id;
+      return response;
     } catch (error) {
       console.error('PayPal order creation failed:', error);
       throw error;
