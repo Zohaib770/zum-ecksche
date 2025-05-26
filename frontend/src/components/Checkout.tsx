@@ -104,7 +104,6 @@ const CheckoutForm: React.FC = () => {
         paymentMethod,
         deliveryAddress: orderType === 'delivery' ? deliveryAddress : undefined,
         price: calculateTotal(),
-        // onlinePaymentMethod: paymentMethod === 'online' ? onlinePaymentMethod : undefined,
         paypalOrderId: '',
         paypalTransactionId: '',
         status: paymentMethod === 'cash' ? 'new' : 'pending_payment',
@@ -388,7 +387,7 @@ const CheckoutForm: React.FC = () => {
                 onSuccess={() => {
                   toast.success('Zahlung erfolgreich!');
                   clearCart();
-                  // navigate('/erfolg');
+                  navigate('/erfolg');
                 }}
                 onError={(error) => {
                   toast.error('Zahlung fehlgeschlagen');
