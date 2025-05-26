@@ -21,7 +21,7 @@ const PayPalPayment: React.FC<PayPalProps> = ({ order, onSuccess, onError, onCan
 
   const createOrder = async (data: any, actions: any) => {
     try {
-      const response  = await Apis.paypalCreateOrder(order);
+      const response = await Apis.paypalCreateOrder(order);
       return response.data.id;
     } catch (error) {
       toast.error('Fehler bei der PayPal-Ordererstellung');
