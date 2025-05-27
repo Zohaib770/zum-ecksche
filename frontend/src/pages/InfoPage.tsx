@@ -2,6 +2,9 @@ import React from 'react';
 import { Typography, Box, Container, Divider } from '@mui/material';
 
 const InfoPage: React.FC = () => {
+
+  const INFO_EMAIL = import.meta.env.VITE_INFO_EMAIL;
+
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       {/* Impressum nach § 5 TMG */}
@@ -12,23 +15,42 @@ const InfoPage: React.FC = () => {
         <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
           Angaben gemäß § 5 TMG:
         </Typography>
-        <Typography variant="body1" paragraph>
+        <Typography variant="body1">
           <strong>Betreiber:</strong> Zum Eck'sche<br />
           Medicus Str. 26<br />
           67655 Kaiserslautern
         </Typography>
-        <Typography variant="body1" paragraph>
+        <Typography variant="body1">
           <strong>Kontakt:</strong><br />
           Telefon: 0631-41488411<br />
-          E-Mail: info@zumeckschepizza.de
+          E-Mail: {INFO_EMAIL}
         </Typography>
-        <Typography variant="body1" paragraph>
+        <Typography variant="body1">
           <strong>Umsatzsteuer-ID:</strong><br />
-          Umsatzsteuer-Identifikationsnummer gemäß §27a Umsatzsteuergesetz: [Ihre USt-IdNr. einfügen]
+          Umsatzsteuer-Identifikationsnummer gemäß §27a Umsatzsteuergesetz: 19/057/34574
+        </Typography>
+      </Box>
+
+      <Divider sx={{ my: 4 }} />
+
+      {/* Zusatzstoffe und Allergene */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
+          Zusatzstoffe und Allergene
+        </Typography>
+
+        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+          Zusatzstoffe:
         </Typography>
         <Typography variant="body1" paragraph>
-          <strong>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:</strong><br />
-          [Name des verantwortlichen Redakteurs einfügen]
+          1: mit Farbstoff, 2: mit Konservierungsstoff, 3: mit Antioxidationsmittel, 4: mit Geschmacksverstärker, 5: geschwärzt, 6: mit Süßungsmittel, 7: enthält eine Phenylalaninquelle, 8: phosphathaltig, 9: chininhaltig, 10: coffeinhaltig
+        </Typography>
+
+        <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
+          Allergene:
+        </Typography>
+        <Typography variant="body1" paragraph>
+          a: enthält glutenhaltiges Weizengetreide/-Erzeugnisse, b: enthält Krebstiere, c: enthält Ei, d: enthält Fisch, e: enthält Nüsse, f: enthält Soja, g: enthält Milch, h: enthält Schalenfrüchte, i: enthält Sellerie, j: enthält Senf, k: enthält Sesam, l: enthält Sulfite
         </Typography>
       </Box>
 
@@ -39,7 +61,7 @@ const InfoPage: React.FC = () => {
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
           Datenschutzerklärung
         </Typography>
-        
+
         <Typography variant="body1" paragraph>
           Verantwortlicher im Sinne der Datenschutzgesetze, insbesondere der EU-Datenschutzgrundverordnung (DSGVO) und des Bundesdatenschutzgesetzes (BDSG):
         </Typography>
@@ -78,13 +100,6 @@ const InfoPage: React.FC = () => {
         </Typography>
 
         <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-          § 3 Erhebung technischer Daten
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Bei Zugriff auf unsere Website erheben wir automatisch technische Daten wie IP-Adresse, Browsertyp und Zugriffszeiten. Diese Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO aus unserem berechtigten Interesse an der technischen Funktionsfähigkeit und Sicherheit unserer Website.
-        </Typography>
-
-        <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
           § 4 Cookies
         </Typography>
         <Typography variant="body1" paragraph>
@@ -105,9 +120,6 @@ const InfoPage: React.FC = () => {
           Bei Zahlung via PayPal, Kreditkarte oder anderen Anbietern werden Ihre Zahlungsdaten direkt an den jeweiligen Anbieter übermittelt. Dies erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO.
         </Typography>
       </Box>
-
-      <Divider sx={{ my: 4 }} />
-
     </Container>
   );
 };

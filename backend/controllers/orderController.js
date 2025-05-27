@@ -8,9 +8,7 @@ const createOrder = async (req, res) => {
     const newOrder = new Order(orderData);
     const saveorder = await newOrder.save();
     console.log("Bestellung erfolgreich gespeichert");
-
-    await sendOrderConfirmation(saveorder, req.body.personalDetail.email);
-
+    sendOrderConfirmation(saveorder, req.body.personalDetail.email);
     const io = getIO(); // Rufe die initialisierte io-Instanz ab
     io.emit('newOrder', newOrder);
     res.status(201).json({ message: 'Bestellung erfolgreich gespeichert', order: newOrder });

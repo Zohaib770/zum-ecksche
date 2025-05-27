@@ -11,6 +11,7 @@ import AdminPage from "./pages/AdminPage";
 import LoginPage from "./pages/LoginPage";
 
 import InfoPage from "./pages/InfoPage";
+import SuccessPage from "./pages/SuccessPage";
 import CookieBanner from './components/CookieBanner';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
         <Route path="/info" element={<InfoPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/erfolg" element={<SuccessPage />} />
 
         <Route path="/admin/*" element={<AdminPage />} />
 

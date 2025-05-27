@@ -35,7 +35,7 @@ const OrderSchema = new mongoose.Schema({
   orderType: { type: String, enum: ['delivery', 'pickup'], required: true },
   paymentMethod: { type: String, enum: ['cash', 'online'], required: true },
   onlinePaymentMethod: { type: String, enum: ['paypal', 'giro'], required: false },
-  payPalOrderId: { type: String, default: '' },
+  paypalOrderId: { type: String, default: '' },
   paypalTransactionId: { type: String, default: '' },
   status: { type: String, default: 'new' },
   createdAt: { type: String, default: () => new Date().toISOString() }

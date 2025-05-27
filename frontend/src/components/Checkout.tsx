@@ -13,7 +13,7 @@ const CheckoutForm: React.FC = () => {
   const { items, clearCart } = useCart();
   const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'online'>('cash');
-  const [onlinePaymentMethod, setOnlinePaymentMethod] = useState<'paypal' | 'giro' | null>(null);
+  const [onlinePaymentMethod, setOnlinePaymentMethod] = useState<'paypal' | null>(null);
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const [showPayPalModal, setShowPayPalModal] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress>({
@@ -104,7 +104,6 @@ const CheckoutForm: React.FC = () => {
         paymentMethod,
         deliveryAddress: orderType === 'delivery' ? deliveryAddress : undefined,
         price: calculateTotal(),
-        // onlinePaymentMethod: paymentMethod === 'online' ? onlinePaymentMethod : undefined,
         paypalOrderId: '',
         paypalTransactionId: '',
         status: paymentMethod === 'cash' ? 'new' : 'pending_payment',
@@ -115,7 +114,7 @@ const CheckoutForm: React.FC = () => {
         await Apis.addOrder(orderData);
         toast.success('Bestellung erfolgreich aufgegeben!');
         clearCart();
-        navigate('/erfolg');
+        navigate('/erfolg', { state: { paymentMethod: 'cash' } });
       }
     } catch (error) {
       console.error('Fehler beim Abschicken der Bestellung:', error);
@@ -235,7 +234,6 @@ const CheckoutForm: React.FC = () => {
                   type="text"
                   id="postalCode"
                   name="postalCode"
-                  value={deliveryAddress.postalCode}
                   onChange={handleAddressChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
                   required
@@ -331,7 +329,7 @@ const CheckoutForm: React.FC = () => {
           <div className="mt-4 space-y-3">
             <h3 className="text-lg font-medium">Online-Zahlungsmethode wählen:</h3>
             <div className="space-y-2">
-              {['paypal', 'giro'].map((method) => (
+              {['paypal'].map((method) => (
                 <label key={method} className="flex items-center space-x-3">
                   <input
                     type="radio"
@@ -342,7 +340,6 @@ const CheckoutForm: React.FC = () => {
                   />
                   <span>
                     {method === 'paypal' && 'PayPal'}
-                    {method === 'giro' && 'Giro Business Account'}
                   </span>
                 </label>
               ))}
@@ -390,7 +387,7 @@ const CheckoutForm: React.FC = () => {
                 onSuccess={() => {
                   toast.success('Zahlung erfolgreich!');
                   clearCart();
-                  // navigate('/erfolg');
+                  navigate('/erfolg', { state: { paymentMethod: 'online' } });
                 }}
                 onError={(error) => {
                   toast.error('Zahlung fehlgeschlagen');

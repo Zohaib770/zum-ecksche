@@ -32,10 +32,6 @@ const server = http.createServer(app);
 // Socket.IO Setup und Initialisierung
 const io = initializeSocket(server, FRONTEND_URL);
 
-// app.listen(PORT, () => {
-//   console.log(`Server listening on http://localhost:${PORT}`);
-// });
-
 server.listen(PORT, () => {
   console.log(`Server listening on http://localhost:${PORT}`);
 });

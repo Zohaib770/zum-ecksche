@@ -7,7 +7,6 @@ const deliveryZoneController = require('../controllers/deliveryZoneController')
 const extraController = require('../controllers/extraController')
 const orderController = require('../controllers/orderController')
 const paymentController = require('../controllers/paymentController')
-const printOrderReceipt = require('../controllers/printerController') 
 const { verifyToken } = require('../config/jwtVerify')
 
 const router = express.Router();
@@ -44,8 +43,5 @@ router.post('/update-order-status', verifyToken, orderController.updateOrderStat
 //payments
 router.post('/paypal-create-order', paymentController.paypalCreateOrder);
 router.post('/paypal-capture-order', paymentController.paypalCaptureOrder);
-
-//print
-router.post('/print', printOrderReceipt.printOrderReceipt);
 
 module.exports = router;

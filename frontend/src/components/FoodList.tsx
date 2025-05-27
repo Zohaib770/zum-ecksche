@@ -239,19 +239,22 @@ const FoodList = () => {
                           <div className="flex justify-between">
                             <div>
                               <h4 className="font-medium">
-                                {food.name} <span className="font-medium">{convertPriceFromDotToComma(food.price)} €</span>
+                                {food.name}
                               </h4>
                               {food.description && (
                                 <p className="text-sm text-gray-600">{food.description}</p>
                               )}
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => addFoodItem(food)}
-                              className="w-7 h-7 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
-                            >
-                              +
-                            </button>
+                            <div>
+                              <span className="font-medium mr-2">{convertPriceFromDotToComma(food.price)} €</span>
+                              <button
+                                type="button"
+                                onClick={() => addFoodItem(food)}
+                                className="w-7 h-7 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                              >
+                                +
+                              </button>
+                            </div>
                           </div>
                           {food.options?.map((option: Option, i) => (
                             <div key={i} className="mt-1 text-sm">
