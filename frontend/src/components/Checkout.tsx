@@ -18,7 +18,7 @@ const CheckoutForm: React.FC = () => {
   const [showPayPalModal, setShowPayPalModal] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress>({
     street: '',
-    postalCode: 0,
+    postalCode: '',
     city: '',
     floor: '',
     comment: ''
@@ -66,14 +66,10 @@ const CheckoutForm: React.FC = () => {
     }
   };
 
-  // Form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validation
+  const validateFields = (): boolean => {
     if (!personalDetail.fullName || !personalDetail.phone || !personalDetail.email) {
       toast.error('Bitte füllen Sie alle erforderlichen Felder aus.');
-      return;
+      return false;
     }
 
     if (orderType === 'delivery') {
@@ -82,13 +78,26 @@ const CheckoutForm: React.FC = () => {
 
       if (calculateTotal() < minAmount) {
         toast.error(`Mindestbestellwert für ${deliveryAddress.city} ist ${minAmount} €.`);
-        return;
+        return false;
       }
 
       if (!deliveryAddress.street || !deliveryAddress.postalCode || !deliveryAddress.city) {
         toast.error('Bitte füllen Sie die Lieferadresse vollständig aus.');
-        return;
+        return false;
       }
+    }
+
+    return true;
+  };
+
+
+  // Form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validation
+    if (!validateFields()) {
+      return;
     }
 
     if (paymentMethod === 'online' && !onlinePaymentMethod) {
@@ -234,6 +243,7 @@ const CheckoutForm: React.FC = () => {
                   type="text"
                   id="postalCode"
                   name="postalCode"
+                  value={deliveryAddress.postalCode}
                   onChange={handleAddressChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
                   required
@@ -315,7 +325,12 @@ const CheckoutForm: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={() => setPaymentMethod('online')}
+            onClick={() => {
+              if (!validateFields()) {
+                return;
+              }
+              setPaymentMethod('online')
+            }}
             className={`flex-1 py-2 px-4 rounded-md border ${paymentMethod === 'online'
               ? 'bg-yellow-600 text-white border-yellow-600'
               : 'bg-white border-gray-300'
@@ -368,7 +383,12 @@ const CheckoutForm: React.FC = () => {
           {paymentMethod === 'online' && onlinePaymentMethod === 'paypal' ? (
             <button
               type="button"
-              onClick={() => setShowPayPalModal(true)} // Add state for this if needed
+              onClick={() => {
+                if (!validateFields()) {
+                  return;
+                }
+                setShowPayPalModal(true);
+              }}
               className="w-full py-3 px-4 rounded-lg"
             >
               <PayPalPayment
