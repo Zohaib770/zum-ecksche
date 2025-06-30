@@ -72,6 +72,12 @@ const CheckoutForm: React.FC = () => {
       return false;
     }
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(personalDetail.email)) {
+      toast.error('Bitte geben Sie eine gültige E-Mail-Adresse ein.');
+      return false;
+    }
+
+
     if (orderType === 'delivery') {
       const selectedZone = deliveryZones.find(zone => zone.name === deliveryAddress.city);
       const minAmount = selectedZone?.min_order_price ?? 0;
