@@ -38,7 +38,7 @@ export interface CartItem {
 export interface DeliveryAddress {
   _id?: number,
   street: string,
-  postalCode: number,
+  postalCode: string,
   city: string,
   floor: string,
   comment: string,
