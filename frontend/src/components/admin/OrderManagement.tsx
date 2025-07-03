@@ -124,15 +124,13 @@ const OrderManagement = () => {
     try {
       const epson = (window as any).epson;
 
-      if (!epson) {
-        throw new Error("Epson SDK not loaded. Check if 'epson.js' is included.");
-      }
-      if (!epson.ePOSDevice) {
-        throw new Error("ePOSDevice missing. Update the Epson SDK.");
+      if (!epson || !epson.ePOSDevice) {
+        throw new Error("Epson SDK not loaded or ePOSDevice missing.");
       }
 
       const device = new epson.ePOSDevice();
       const printerIp = import.meta.env.VITE_PRINTER_IP; // e.g., 'tcp://192.168.2.178:9100'
+      const port = 9100; //8008
 
       if (!printerIp) {
         throw new Error("Printer IP not set in .env");
@@ -141,47 +139,51 @@ const OrderManagement = () => {
       // Show "Connecting..." toast
       toast.info("Connecting to printer...");
 
-      device.connect(printerIp, false, (resultConnect: number) => {
-        if (resultConnect === 0) {
-          toast.success("Printer connected!");
-          device.createDevice(
-            'local_printer',
-            epson.ePOSDevice.DEVICE_TYPE_PRINTER,
-            { crypto: false, buffer: false },
-            (devObj: any, code: string) => {
-              if (code === 'OK') {
-                toast.success("Printer device ready – no print job sent (test only)");
-                // const printer = devObj;
-                // printer.onerror = (error: any) => {
-                //   toast.error(`Printer error: ${error.message || error}`);
-                // };
+      device.connect(
+        printerIp,
+        false,
+        (resultConnect: number) => {
+          if (resultConnect === 0) {
+            toast.success("Printer connected!");
+            
+            device.createDevice(
+              'local_printer',
+              epson.ePOSDevice.DEVICE_TYPE_PRINTER,
+              { crypto: false, buffer: false },
+              (devObj: any, code: string) => {
+                if (code === 'OK') {
+                  toast.success("Printer device ready – no print job sent (test only)");
+                  const printer = devObj;
+                  printer.onerror = (error: any) => {
+                    toast.error(`Printer error: ${error.message || error}`);
+                  };
 
-                // Configure printer for Western characters
-                // printer.addTextFont(epson.ePOSDevice.FONT_A);
-                // printer.addTextLang('en');
-                // printer.addTextSmooth(true);
+                  // Configure printer for Western characters
+                  printer.addTextFont(epson.ePOSDevice.FONT_A);
+                  printer.addTextLang('en');
+                  printer.addTextSmooth(true);
 
-                // printer.addText("Hallo Welt!\n");
-                // printer.addCut();
-                // printer.send();
-                toast.success("Print job sent!");
-              } else {
-                toast.error(`Printer setup failed (Code: ${code}). Check IP/port.`);
+                  printer.addText("Hallo Welt!\n");
+                  printer.addCut();
+                  printer.send();
+                  toast.success("Print job sent!");
+                } else {
+                  toast.error(`Printer setup failed (Code: ${code}). Check IP/port.`);
+                }
               }
-            }
-          );
-        } else {
-          const errorMessages: Record<number, string> = {
-            1: "Timeout – Printer may be offline.",
-            2: "Invalid parameters (check IP).",
-            3: "Network issue (unreachable IP).",
-            4: "Port not open (check firewall).",
-            8: "Printer malfunction.",
-          };
-          const message = errorMessages[resultConnect] || `Connection failed (Code: ${resultConnect})`;
-          toast.error(message);
-        }
-      });
+            );
+          } else {
+            const errorMessages: Record<number, string> = {
+              1: "Timeout – Printer may be offline.",
+              2: "Invalid parameters (check IP).",
+              3: "Network issue (unreachable IP).",
+              4: "Port not open (check firewall).",
+              8: "Printer malfunction.",
+            };
+            const message = errorMessages[resultConnect] || `Connection failed (Code: ${resultConnect})`;
+            toast.error(message);
+          }
+        });
 
     } catch (error) {
       toast.error(`Printing failed: ${error instanceof Error ? error.message : String(error)}`);
